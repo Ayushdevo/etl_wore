@@ -1,0 +1,5 @@
+[
+    {"order_id": 5001, "customer_id": 101, "amount": 149.99, "currency": "USD"},
+    {"order_id": 5002, "customer_id": 102, "amount": 89.50, "currency": "USD"},
+    {"order_id": 5003, "customer_id": 103, "amount": 320.00, "currency": "EUR"}
+]

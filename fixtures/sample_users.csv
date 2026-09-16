@@ -1,0 +1,5 @@
+id,name,email,signup_date,status
+101, Alice Smith ,alice@example.com,2026-01-15,ACTIVE
+102, Bob Jones,bob@example.com,2026-02-20,PENDING
+103, Charlie Brown ,charlie@example.com,2026-03-01,ACTIVE
+104, Alice Smith ,alice@example.com,2026-01-15,ACTIVE

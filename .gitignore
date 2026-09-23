@@ -22,11 +22,7 @@ wheels/
 *.egg
 
 # Virtual environments
-.env
-.venv
-env/
-venv/
-ENV/
+
 
 # Testing and coverage
 .pytest_cache/

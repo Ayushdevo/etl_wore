@@ -30,6 +30,7 @@ pip install -e .
 ### Python Example
 
 ```python
+
 from etl_wore.pipeline.engine import Pipeline
 from etl_wore.extractors.csv_extractor import CsvExtractor
 from etl_wore.transformers.sanitizer import DataSanitizer
@@ -51,6 +52,7 @@ print(result.summary())
 ```bash
 pytest -v
 ```
+`````````````````````````````````````````````````````````````````````````````````````````
 
 ---
 

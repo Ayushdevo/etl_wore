@@ -19,12 +19,16 @@ class CsvExtractor(BaseExtractor):
             raise ExtractionError(f"CSV file not found: {self.filepath}")
 
         try:
-            with open(self.filepath, mode="r", encoding=self.encoding) as f:
+            with open(self.filepath, mode="r", encoding=self.encoding, newline="") as f:
                 if not self.delimiter:
                     sample = f.read(2048)
                     f.seek(0)
-                    dialect = csv.Sniffer().sniff(sample)
-                    delimiter = dialect.delimiter
+                    if not sample:
+                        return
+                    try:
+                        delimiter = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
+                    except csv.Error:
+                        delimiter = ","
                 else:
                     delimiter = self.delimiter
 

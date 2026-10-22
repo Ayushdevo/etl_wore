@@ -1,6 +1,7 @@
 """
 Retry decorator with exponential backoff.
 """
+import math
 import time
 import functools
 from ..logger import setup_logger
@@ -8,6 +9,13 @@ from ..logger import setup_logger
 logger = setup_logger("etl_wore.utils.retry")
 
 def retry(max_attempts: int = 3, initial_delay: float = 1.0, backoff_factor: float = 2.0, exceptions=(Exception,)):
+    if isinstance(max_attempts, bool) or not isinstance(max_attempts, int) or max_attempts < 1:
+        raise ValueError("max_attempts must be a positive integer")
+    if not math.isfinite(initial_delay) or initial_delay < 0:
+        raise ValueError("initial_delay must be finite and nonnegative")
+    if not math.isfinite(backoff_factor) or backoff_factor <= 0:
+        raise ValueError("backoff_factor must be finite and positive")
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

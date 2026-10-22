@@ -24,11 +24,16 @@ class JsonExtractor(BaseExtractor):
                     for line_no, line in enumerate(f, start=1):
                         line = line.strip()
                         if line:
-                            yield json.loads(line)
+                            item = json.loads(line)
+                            if not isinstance(item, dict):
+                                raise ExtractionError(f"JSON Lines record at line {line_no} must be an object")
+                            yield item
                 else:
                     data = json.load(f)
                     if isinstance(data, list):
-                        for item in data:
+                        for index, item in enumerate(data):
+                            if not isinstance(item, dict):
+                                raise ExtractionError(f"JSON array record at index {index} must be an object")
                             yield item
                     elif isinstance(data, dict):
                         yield data

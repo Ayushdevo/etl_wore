@@ -40,7 +40,7 @@ class SqliteLoader(BaseLoader):
         try:
             with conn:
                 conn.execute(create_sql)
-                rows = [[str(r.get(c, "")) for c in columns] for r in records]
+                rows = [[None if r.get(c, "") is None else str(r.get(c, "")) for c in columns] for r in records]
                 conn.executemany(insert_sql, rows)
         except Exception as e:
             raise LoadingError(f"Failed to insert into SQLite table {self.table_name}: {e}") from e

@@ -22,8 +22,15 @@ class CsvLoader(BaseLoader):
         headers = list(records[0].keys())
 
         try:
-            mode = "a" if self._initialized or os.path.exists(self.output_path) else "w"
-            write_header = mode == "w"
+            has_content = os.path.exists(self.output_path) and os.path.getsize(self.output_path) > 0
+            if has_content:
+                with open(self.output_path, newline="", encoding="utf-8") as existing:
+                    headers = next(csv.reader(existing, delimiter=self.delimiter))
+            # Validate the whole batch before appending any rows.
+            if any(set(record) - set(headers) for record in records):
+                raise ValueError("Record contains columns absent from the CSV header")
+            mode = "a" if has_content else "w"
+            write_header = not has_content
 
             with open(self.output_path, mode=mode, newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=headers, delimiter=self.delimiter)

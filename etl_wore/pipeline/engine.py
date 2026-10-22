@@ -12,6 +12,8 @@ logger = setup_logger("etl_wore.pipeline.engine")
 
 class Pipeline:
     def __init__(self, name: str, batch_size: int = 500):
+        if isinstance(batch_size, bool) or not isinstance(batch_size, int) or batch_size < 1:
+            raise ValueError("batch_size must be a positive integer")
         self.name = name
         self.batch_size = batch_size
         self.extractors: List[BaseExtractor] = []

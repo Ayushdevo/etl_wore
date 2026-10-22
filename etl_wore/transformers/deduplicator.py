@@ -4,6 +4,15 @@ Deduplication transformer using key hashes.
 from typing import Dict, Any, Optional, List
 from .base import BaseTransformer
 
+def _freeze(value):
+    """Make nested JSON values hashable without depending on mapping order."""
+    if isinstance(value, dict):
+        return (dict, frozenset((key, _freeze(item)) for key, item in value.items()))
+    if isinstance(value, list):
+        return (list, tuple(_freeze(item) for item in value))
+    return (type(value), value)
+
+
 class DeduplicationTransformer(BaseTransformer):
     def __init__(self, key_fields: List[str]):
         super().__init__()
@@ -11,7 +20,7 @@ class DeduplicationTransformer(BaseTransformer):
         self._seen_keys = set()
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        composite_key = tuple(record.get(k) for k in self.key_fields)
+        composite_key = tuple(_freeze(record.get(k)) for k in self.key_fields)
         if composite_key in self._seen_keys:
             return None  # Drop duplicate
         self._seen_keys.add(composite_key)

@@ -26,11 +26,16 @@ class SqliteLoader(BaseLoader):
 
         conn = self._get_connection()
         columns = list(records[0].keys())
-        col_defs = ", ".join(f'"{col}" TEXT' for col in columns)
-        create_sql = f'CREATE TABLE IF NOT EXISTS "{self.table_name}" ({col_defs})'
+        def quote(identifier):
+            return '"' + identifier.replace('"', '""') + '"'
+
+        table = quote(self.table_name)
+        col_defs = ", ".join(f"{quote(col)} TEXT" for col in columns)
+        create_sql = f"CREATE TABLE IF NOT EXISTS {table} ({col_defs})"
 
         placeholders = ", ".join("?" for _ in columns)
-        insert_sql = f'INSERT INTO "{self.table_name}" ({", ".join(f"`{c}`" for c in columns)}) VALUES ({placeholders})'
+        column_names = ", ".join(quote(col) for col in columns)
+        insert_sql = f"INSERT INTO {table} ({column_names}) VALUES ({placeholders})"
 
         try:
             with conn:

@@ -36,31 +36,43 @@ class Pipeline:
         ctx = PipelineContext(self.name)
         logger.info(f"Starting pipeline '{self.name}'...")
 
-        batch = []
-        for extractor in self.extractors:
-            for record in extractor.extract():
-                ctx.records_extracted += 1
-                curr = record
-                for transformer in self.transformers:
-                    curr = transformer.transform(curr)
-                    if curr is None:
-                        ctx.records_dropped += 1
-                        break
-                if curr is not None:
-                    ctx.records_transformed += 1
-                    batch.append(curr)
+        try:
+            batch = []
+            for extractor in self.extractors:
+                for record in extractor.extract():
+                    ctx.records_extracted += 1
+                    curr = record
+                    for transformer in self.transformers:
+                        curr = transformer.transform(curr)
+                        if curr is None:
+                            ctx.records_dropped += 1
+                            break
+                    if curr is not None:
+                        ctx.records_transformed += 1
+                        batch.append(curr)
 
-                if len(batch) >= self.batch_size:
-                    self._flush_batch(batch, ctx)
-                    batch = []
+                    if len(batch) >= self.batch_size:
+                        self._flush_batch(batch, ctx)
+                        batch = []
 
-        if batch:
-            self._flush_batch(batch, ctx)
+            if batch:
+                self._flush_batch(batch, ctx)
 
-        for loader in self.loaders:
-            loader.close()
+        finally:
+            # Attempt every close, preserve an active processing error, and finalize metrics.
+            import sys
+            processing_failed = sys.exc_info()[0] is not None
+            close_error = None
+            for loader in self.loaders:
+                try:
+                    loader.close()
+                except Exception as exc:
+                    if close_error is None:
+                        close_error = exc
+            ctx.finish()
+            if close_error is not None and not processing_failed:
+                raise close_error
 
-        ctx.finish()
         logger.info(f"Pipeline '{self.name}' finished. Stats: {ctx.summary()}")
         return ctx
 

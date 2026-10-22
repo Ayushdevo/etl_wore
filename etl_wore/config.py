@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 class Config:
     def __init__(self, defaults: Dict[str, Any] = None):
-        self._settings = defaults or {}
+        self._settings = dict(defaults) if defaults is not None else {}
 
     def get(self, key: str, default: Any = None) -> Any:
         # Check environment variable first, capitalized with ETL_ prefix

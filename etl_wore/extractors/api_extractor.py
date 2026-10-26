@@ -15,7 +15,7 @@ class RestApiExtractor(BaseExtractor):
         self.page_param = page_param
 
     @retry(max_attempts=3, initial_delay=1.0)
-    def _fetch_page(self, page: int) -> Dict[str, Any]:
+    def _fetch_page(self, page: int) -> Any:
         params = {self.page_param: page}
         response = requests.get(self.endpoint, headers=self.headers, params=params, timeout=10)
         response.raise_for_status()
@@ -29,7 +29,19 @@ class RestApiExtractor(BaseExtractor):
             except Exception as e:
                 raise ExtractionError(f"Failed to fetch page {page} from {self.endpoint}: {e}") from e
 
-            items = data if isinstance(data, list) else data.get("items", data.get("data", []))
+            if isinstance(data, list):
+                items = data
+            elif isinstance(data, dict):
+                items = data.get("items", data.get("data", []))
+            else:
+                raise ExtractionError(f"Invalid response on page {page}: expected an array or object")
+
+            if not isinstance(items, list):
+                raise ExtractionError(f"Invalid records on page {page}: expected an array")
+            # Validate the whole page before allowing partial records downstream.
+            for index, item in enumerate(items):
+                if not isinstance(item, dict):
+                    raise ExtractionError(f"Invalid record on page {page} at index {index}: expected an object")
             if not items:
                 break
 

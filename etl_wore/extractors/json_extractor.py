@@ -38,7 +38,7 @@ class JsonExtractor(BaseExtractor):
                         for index, item in enumerate(data):
                             if not isinstance(item, dict):
                                 raise ExtractionError(f"JSON array record at index {index} must be an object")
-                            yield item
+                        yield from data
                     elif isinstance(data, dict):
                         yield data
                     else:

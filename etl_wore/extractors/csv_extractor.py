@@ -37,6 +37,8 @@ class CsvExtractor(BaseExtractor):
                 if headers is not None and (any(not name for name in headers) or len(set(headers)) != len(headers)):
                     raise ExtractionError("CSV column names must be nonempty and unique")
                 for row_idx, row in enumerate(reader):
+                    if None in row or any(value is None for value in row.values()):
+                        raise ExtractionError(f"CSV record at line {reader.line_num} does not match the header width")
                     yield dict(row)
         except Exception as e:
             raise ExtractionError(f"Error reading CSV {self.filepath}: {e}") from e

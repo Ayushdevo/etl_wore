@@ -20,7 +20,7 @@ class SchemaValidator(BaseTransformer):
                 raise TransformationError(f"Missing required field: {field}")
 
             val = transformed[field]
-            if not isinstance(val, expected_type):
+            if not isinstance(val, expected_type) or (isinstance(val, bool) and expected_type is int):
                 try:
                     if expected_type is bool:
                         normalized = str(val).strip().casefold()

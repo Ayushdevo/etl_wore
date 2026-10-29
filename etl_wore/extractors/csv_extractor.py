@@ -33,6 +33,9 @@ class CsvExtractor(BaseExtractor):
                     delimiter = self.delimiter
 
                 reader = csv.DictReader(f, delimiter=delimiter)
+                headers = reader.fieldnames
+                if headers is not None and (any(not name for name in headers) or len(set(headers)) != len(headers)):
+                    raise ExtractionError("CSV column names must be nonempty and unique")
                 for row_idx, row in enumerate(reader):
                     yield dict(row)
         except Exception as e:

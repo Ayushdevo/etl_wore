@@ -24,8 +24,10 @@ class SqliteLoader(BaseLoader):
         if not records:
             return
 
-        conn = self._get_connection()
         columns = list(records[0].keys())
+        if any(set(record) - set(columns) for record in records):
+            raise LoadingError("Record contains columns absent from the first SQLite batch record")
+        conn = self._get_connection()
         def quote(identifier):
             return '"' + identifier.replace('"', '""') + '"'
 
@@ -49,3 +51,4 @@ class SqliteLoader(BaseLoader):
         if self._conn:
             self._conn.close()
             self._conn = None
+

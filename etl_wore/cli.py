@@ -30,6 +30,7 @@ def main():
     if args.dry_run:
         logger.info("Dry run check passed successfully.")
         sys.exit(0)
+    parser.error("Declarative execution is not implemented; use --dry-run to validate or construct a Pipeline in Python")
 
 if __name__ == "__main__":
     main()

@@ -16,8 +16,8 @@ class JsonLinesLoader(BaseLoader):
         if not records:
             return
 
-        os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
         try:
+            os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
             if any(not isinstance(record, dict) for record in records):
                 raise ValueError("JSONL records must be objects")
             lines = [json.dumps(record, ensure_ascii=False, allow_nan=False) + "\n" for record in records]

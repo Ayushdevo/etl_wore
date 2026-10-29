@@ -18,10 +18,9 @@ class CsvLoader(BaseLoader):
         if not records:
             return
 
-        os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
-        headers = list(records[0].keys())
-
         try:
+            os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
+            headers = list(records[0].keys())
             has_content = os.path.exists(self.output_path) and os.path.getsize(self.output_path) > 0
             if has_content:
                 with open(self.output_path, newline="", encoding="utf-8") as existing:

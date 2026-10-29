@@ -8,7 +8,7 @@ from .base import BaseExtractor
 from ..exceptions import ExtractionError
 
 class CsvExtractor(BaseExtractor):
-    def __init__(self, filepath: str, delimiter: str = None, encoding: str = "utf-8"):
+    def __init__(self, filepath: str, delimiter: str = None, encoding: str = "utf-8-sig"):
         super().__init__(name=f"CsvExtractor({os.path.basename(filepath)})")
         self.filepath = filepath
         self.delimiter = delimiter
@@ -37,3 +37,4 @@ class CsvExtractor(BaseExtractor):
                     yield dict(row)
         except Exception as e:
             raise ExtractionError(f"Error reading CSV {self.filepath}: {e}") from e
+

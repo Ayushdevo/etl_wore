@@ -8,6 +8,8 @@ class PipelineContext:
     def __init__(self, pipeline_name: str = "default_pipeline"):
         self.pipeline_name = pipeline_name
         self.start_time = time.time()
+        self._start_monotonic = time.monotonic()
+        self._end_monotonic = None
         self.end_time = None
         self.records_extracted = 0
         self.records_transformed = 0
@@ -16,12 +18,14 @@ class PipelineContext:
         self.metadata: Dict[str, Any] = {}
 
     def finish(self):
-        self.end_time = time.time()
+        if self.end_time is None:
+            self.end_time = time.time()
+            self._end_monotonic = time.monotonic()
 
     @property
     def duration_seconds(self) -> float:
-        end = self.end_time or time.time()
-        return round(end - self.start_time, 3)
+        end = self._end_monotonic if self._end_monotonic is not None else time.monotonic()
+        return round(end - self._start_monotonic, 3)
 
     def summary(self) -> Dict[str, Any]:
         return {
@@ -32,3 +36,4 @@ class PipelineContext:
             "loaded": self.records_loaded,
             "dropped": self.records_dropped
         }
+

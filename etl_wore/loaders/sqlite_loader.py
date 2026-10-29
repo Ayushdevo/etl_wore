@@ -24,8 +24,9 @@ class SqliteLoader(BaseLoader):
         if not records:
             return
 
-        conn = self._get_connection()
         columns = list(records[0].keys())
+        if any(set(record) - set(columns) for record in records):
+            raise LoadingError("Record contains columns absent from the first SQLite batch record")
         def quote(identifier):
             return '"' + identifier.replace('"', '""') + '"'
 
@@ -38,6 +39,7 @@ class SqliteLoader(BaseLoader):
         insert_sql = f"INSERT INTO {table} ({column_names}) VALUES ({placeholders})"
 
         try:
+            conn = self._get_connection()
             with conn:
                 conn.execute(create_sql)
                 rows = [[None if r.get(c, "") is None else str(r.get(c, "")) for c in columns] for r in records]
@@ -49,3 +51,4 @@ class SqliteLoader(BaseLoader):
         if self._conn:
             self._conn.close()
             self._conn = None
+

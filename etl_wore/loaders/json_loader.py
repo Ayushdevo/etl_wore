@@ -16,10 +16,20 @@ class JsonLinesLoader(BaseLoader):
         if not records:
             return
 
-        os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
         try:
+            os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
+            if any(not isinstance(record, dict) for record in records):
+                raise ValueError("JSONL records must be objects")
+            lines = [json.dumps(record, ensure_ascii=False, allow_nan=False) + "\n" for record in records]
+            needs_separator = False
+            if os.path.exists(self.output_path) and os.path.getsize(self.output_path):
+                with open(self.output_path, "rb") as existing:
+                    existing.seek(-1, os.SEEK_END)
+                    needs_separator = existing.read(1) not in (b"\n", b"\r")
             with open(self.output_path, "a", encoding="utf-8") as f:
-                for record in records:
-                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                if needs_separator:
+                    f.write("\n")
+                f.writelines(lines)
         except Exception as e:
             raise LoadingError(f"Failed to write JSONL records to {self.output_path}: {e}") from e
+

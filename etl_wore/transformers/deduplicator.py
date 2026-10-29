@@ -16,7 +16,9 @@ def _freeze(value):
 class DeduplicationTransformer(BaseTransformer):
     def __init__(self, key_fields: List[str]):
         super().__init__()
-        self.key_fields = key_fields
+        if not isinstance(key_fields, (list, tuple)) or not key_fields or any(not isinstance(key, str) or not key for key in key_fields):
+            raise ValueError("key_fields must be a nonempty sequence of field names")
+        self.key_fields = tuple(key_fields)
         self._seen_keys = set()
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -25,3 +27,4 @@ class DeduplicationTransformer(BaseTransformer):
             return None  # Drop duplicate
         self._seen_keys.add(composite_key)
         return record
+

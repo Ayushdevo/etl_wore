@@ -2,6 +2,7 @@
 Concurrent batch loader support using ThreadPoolExecutor.
 """
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from typing import List, Dict, Any
 from ..loaders.base import BaseLoader
 
@@ -18,7 +19,7 @@ class ParallelBatchLoader(BaseLoader):
             raise RuntimeError("Parallel loader is closed")
         if not records:
             return
-        future = self.executor.submit(self.base_loader.load, list(records))
+        future = self.executor.submit(self.base_loader.load, deepcopy(records))
         self.futures.append(future)
 
     def close(self):
@@ -43,3 +44,4 @@ class ParallelBatchLoader(BaseLoader):
                     raise
         if error is not None:
             raise error
+

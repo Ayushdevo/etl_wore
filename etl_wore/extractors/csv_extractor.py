@@ -32,7 +32,7 @@ class CsvExtractor(BaseExtractor):
                 else:
                     delimiter = self.delimiter
 
-                reader = csv.DictReader(f, delimiter=delimiter)
+                reader = csv.DictReader(f, delimiter=delimiter, strict=True)
                 headers = reader.fieldnames
                 if headers is not None and (any(not name for name in headers) or len(set(headers)) != len(headers)):
                     raise ExtractionError("CSV column names must be nonempty and unique")

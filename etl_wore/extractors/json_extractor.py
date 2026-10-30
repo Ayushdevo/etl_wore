@@ -12,7 +12,7 @@ def _reject_constant(value):
 
 
 class JsonExtractor(BaseExtractor):
-    def __init__(self, filepath: str, is_lines: bool = False, encoding: str = "utf-8"):
+    def __init__(self, filepath: str, is_lines: bool = False, encoding: str = "utf-8-sig"):
         super().__init__(name=f"JsonExtractor({os.path.basename(filepath)})")
         self.filepath = filepath
         self.is_lines = is_lines

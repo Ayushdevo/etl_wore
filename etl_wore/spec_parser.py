@@ -1,5 +1,6 @@
 """Declarative JSON/YAML pipeline specification parser."""
 import json
+import math
 import os
 from typing import Dict, Any
 from .exceptions import ConfigurationError
@@ -13,6 +14,17 @@ def _unique_object(pairs):
     return result
 
 
+def _finite_float(text):
+    value = float(text)
+    if not math.isfinite(value):
+        raise ConfigurationError(f"Non-finite specification number: {text}")
+    return value
+
+
+def _reject_constant(text):
+    raise ConfigurationError(f"Invalid JSON constant in specification: {text}")
+
+
 class SpecParser:
     @staticmethod
     def parse_file(filepath: str) -> Dict[str, Any]:
@@ -22,7 +34,7 @@ class SpecParser:
         try:
             with open(filepath, "r", encoding="utf-8") as source:
                 if ext == ".json":
-                    spec = json.load(source, object_pairs_hook=_unique_object)
+                    spec = json.load(source, object_pairs_hook=_unique_object, parse_float=_finite_float, parse_constant=_reject_constant)
                 else:
                     try:
                         import yaml

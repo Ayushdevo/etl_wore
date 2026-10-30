@@ -41,7 +41,13 @@ class SqliteLoader(BaseLoader):
         try:
             conn = self._get_connection()
             with conn:
+                # Include schema changes in the same transaction as the batch.
+                conn.execute("BEGIN")
                 conn.execute(create_sql)
+                existing_columns = {row[1].casefold() for row in conn.execute(f"PRAGMA table_info({table})")}
+                for column in columns:
+                    if column.casefold() not in existing_columns:
+                        conn.execute(f"ALTER TABLE {table} ADD COLUMN {quote(column)} TEXT")
                 rows = [[None if r.get(c, "") is None else str(r.get(c, "")) for c in columns] for r in records]
                 conn.executemany(insert_sql, rows)
         except Exception as e:

@@ -1,6 +1,7 @@
 """
 Core Pipeline execution engine.
 """
+import sys
 from typing import List
 from ..extractors.base import BaseExtractor
 from ..transformers.base import BaseTransformer
@@ -39,28 +40,38 @@ class Pipeline:
         try:
             batch = []
             for extractor in self.extractors:
-                for record in extractor.extract():
-                    ctx.records_extracted += 1
-                    curr = record
-                    for transformer in self.transformers:
-                        curr = transformer.transform(curr)
-                        if curr is None:
-                            ctx.records_dropped += 1
-                            break
-                    if curr is not None:
-                        ctx.records_transformed += 1
-                        batch.append(curr)
+                iterator = iter(extractor.extract())
+                try:
+                    for record in iterator:
+                        ctx.records_extracted += 1
+                        curr = record
+                        for transformer in self.transformers:
+                            curr = transformer.transform(curr)
+                            if curr is None:
+                                ctx.records_dropped += 1
+                                break
+                        if curr is not None:
+                            ctx.records_transformed += 1
+                            batch.append(curr)
 
-                    if len(batch) >= self.batch_size:
-                        self._flush_batch(batch, ctx)
-                        batch = []
+                        if len(batch) >= self.batch_size:
+                            self._flush_batch(batch, ctx)
+                            batch = []
+                finally:
+                    close = getattr(iterator, "close", None)
+                    if close is not None:
+                        processing_failed = sys.exc_info()[0] is not None
+                        try:
+                            close()
+                        except Exception:
+                            if not processing_failed:
+                                raise
 
             if batch:
                 self._flush_batch(batch, ctx)
 
         finally:
             # Attempt every close, preserve an active processing error, and finalize metrics.
-            import sys
             processing_failed = sys.exc_info()[0] is not None
             close_error = None
             for loader in self.loaders:

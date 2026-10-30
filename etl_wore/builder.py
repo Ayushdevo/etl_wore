@@ -10,6 +10,7 @@ from .transformers.sanitizer import DataSanitizer
 from .transformers.schema_validator import SchemaValidator
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.date_normalizer import DateNormalizer
+from .loaders.csv_loader import CsvLoader
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -82,7 +83,8 @@ _TRANSFORMERS = {
     "deduplicate": (DeduplicationTransformer, ['key_fields'], {"key_fields": lambda value: _strings(value) and bool(value)}),
     "schema": (_schema_validator, ['schema'], {"schema": _schema, "drop_invalid": _boolean}),
     "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
-_LOADERS = {}
+_LOADERS = {
+    "csv": (CsvLoader, ['output_path'], {"output_path": _string, "delimiter": _delimiter}),}
 
 
 def validate_spec(spec):

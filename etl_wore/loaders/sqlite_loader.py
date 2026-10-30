@@ -1,11 +1,14 @@
 """
 SQLite destination loader with dynamic table creation.
 """
-import sqlite3
+
 import os
-from typing import List, Dict, Any
-from .base import BaseLoader
+import sqlite3
+from typing import Any, Dict, List
+
 from ..exceptions import LoadingError
+from .base import BaseLoader
+
 
 class SqliteLoader(BaseLoader):
     def __init__(self, db_path: str, table_name: str):
@@ -24,18 +27,37 @@ class SqliteLoader(BaseLoader):
         if not records:
             return
 
-        conn = self._get_connection()
         columns = list(records[0].keys())
-        col_defs = ", ".join(f'"{col}" TEXT' for col in columns)
-        create_sql = f'CREATE TABLE IF NOT EXISTS "{self.table_name}" ({col_defs})'
+        if any(set(record) - set(columns) for record in records):
+            raise LoadingError("Record contains columns absent from the first SQLite batch record")
+
+        def quote(identifier):
+            return '"' + identifier.replace('"', '""') + '"'
+
+        table = quote(self.table_name)
+        col_defs = ", ".join(f"{quote(col)} TEXT" for col in columns)
+        create_sql = f"CREATE TABLE IF NOT EXISTS {table} ({col_defs})"
 
         placeholders = ", ".join("?" for _ in columns)
-        insert_sql = f'INSERT INTO "{self.table_name}" ({", ".join(f"`{c}`" for c in columns)}) VALUES ({placeholders})'
+        column_names = ", ".join(quote(col) for col in columns)
+        insert_sql = f"INSERT INTO {table} ({column_names}) VALUES ({placeholders})"
 
         try:
+            conn = self._get_connection()
             with conn:
+                # Include schema changes in the same transaction as the batch.
+                conn.execute("BEGIN")
                 conn.execute(create_sql)
-                rows = [[str(r.get(c, "")) for c in columns] for r in records]
+                existing_columns = {
+                    row[1].casefold() for row in conn.execute(f"PRAGMA table_info({table})")
+                }
+                for column in columns:
+                    if column.casefold() not in existing_columns:
+                        conn.execute(f"ALTER TABLE {table} ADD COLUMN {quote(column)} TEXT")
+                rows = [
+                    [None if r.get(c, "") is None else str(r.get(c, "")) for c in columns]
+                    for r in records
+                ]
                 conn.executemany(insert_sql, rows)
         except Exception as e:
             raise LoadingError(f"Failed to insert into SQLite table {self.table_name}: {e}") from e

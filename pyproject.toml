@@ -28,3 +28,6 @@ dev = [
 
 [project.scripts]
 etl-wore = "etl_wore.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["etl_wore*"]

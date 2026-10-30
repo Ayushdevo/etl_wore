@@ -1,7 +1,7 @@
 """
 Date Normalizer to standard ISO 8601 formatting.
 """
-from datetime import datetime
+from datetime import timezone
 from typing import Dict, Any, Optional, List
 import dateutil.parser
 from .base import BaseTransformer
@@ -19,6 +19,9 @@ class DateNormalizer(BaseTransformer):
             if raw_val:
                 try:
                     parsed = dateutil.parser.parse(str(raw_val))
+                    if parsed.tzinfo is None:
+                        parsed = parsed.replace(tzinfo=timezone.utc)
+                    parsed = parsed.astimezone(timezone.utc)
                     out[field] = parsed.strftime(self.output_format)
                 except Exception:
                     pass

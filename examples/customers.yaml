@@ -1,0 +1,17 @@
+name: clean_customers
+batch_size: 2
+extractors:
+  - type: csv
+    filepath: ../fixtures/sample_users.csv
+transformers:
+  - type: sanitize
+    mask_fields: [email]
+  - type: schema
+    schema: {id: int}
+  - type: dates
+    date_fields: [signup_date]
+  - type: deduplicate
+    key_fields: [name, signup_date]
+loaders:
+  - type: jsonl
+    output_path: ../output/customers.jsonl

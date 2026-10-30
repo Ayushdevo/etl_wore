@@ -18,14 +18,29 @@ class CsvLoader(BaseLoader):
         if not records:
             return
 
-        os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
-        headers = list(records[0].keys())
-
         try:
-            mode = "a" if self._initialized or os.path.exists(self.output_path) else "w"
-            write_header = mode == "w"
+            os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
+            headers = list(records[0].keys())
+            has_content = os.path.exists(self.output_path) and os.path.getsize(self.output_path) > 0
+            if has_content:
+                with open(self.output_path, newline="", encoding="utf-8") as existing:
+                    headers = next(csv.reader(existing, delimiter=self.delimiter))
+            if not headers or any(not isinstance(name, str) or not name for name in headers) or len(set(headers)) != len(headers):
+                raise ValueError("CSV column names must be nonempty, unique strings")
+            # Validate the whole batch before appending any rows.
+            if any(set(record) - set(headers) for record in records):
+                raise ValueError("Record contains columns absent from the CSV header")
+            mode = "a" if has_content else "w"
+            write_header = not has_content
 
+            needs_separator = False
+            if has_content:
+                with open(self.output_path, "rb") as existing:
+                    existing.seek(-1, os.SEEK_END)
+                    needs_separator = existing.read(1) not in (b"\n", b"\r")
             with open(self.output_path, mode=mode, newline="", encoding="utf-8") as f:
+                if needs_separator:
+                    f.write("\n")
                 writer = csv.DictWriter(f, fieldnames=headers, delimiter=self.delimiter)
                 if write_header:
                     writer.writeheader()
@@ -34,3 +49,4 @@ class CsvLoader(BaseLoader):
             self._initialized = True
         except Exception as e:
             raise LoadingError(f"Failed to write CSV records to {self.output_path}: {e}") from e
+

@@ -47,3 +47,11 @@ def test_failed_extraction_is_a_cli_error_without_output(tmp_path):
         main(["--spec", str(path)])
     assert exc.value.code == 2
     assert not (tmp_path / "out.jsonl").exists()
+
+
+
+def test_module_entry_point_runs_the_pipeline(tmp_path):
+    path = make_spec(tmp_path)
+    result = subprocess.run([sys.executable, "-m", "etl_wore", "--spec", str(path)], cwd=tmp_path, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert len((tmp_path / "out.jsonl").read_text().splitlines()) == 2

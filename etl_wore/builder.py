@@ -7,6 +7,7 @@ from .extractors.csv_extractor import CsvExtractor
 from .extractors.json_extractor import JsonExtractor
 from .extractors.api_extractor import RestApiExtractor
 from .transformers.sanitizer import DataSanitizer
+from .transformers.schema_validator import SchemaValidator
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -55,12 +56,27 @@ def _http_url(value):
         return False
 
 
+_SCHEMA_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
+
+
+def _schema(value):
+    return isinstance(value, dict) and bool(value) and all(
+        _string(key) and isinstance(kind, str) and kind in _SCHEMA_TYPES
+        for key, kind in value.items()
+    )
+
+
+def _schema_validator(schema, drop_invalid=False):
+    return SchemaValidator({key: _SCHEMA_TYPES[kind] for key, kind in schema.items()}, drop_invalid=drop_invalid)
+
+
 # Entries are (constructor, required options, option validators). No dynamic imports.
 _EXTRACTORS = {
     "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string}),
     "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
     "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
 _TRANSFORMERS = {
+    "schema": (_schema_validator, ['schema'], {"schema": _schema, "drop_invalid": _boolean}),
     "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
 _LOADERS = {}
 

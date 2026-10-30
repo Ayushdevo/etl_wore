@@ -4,6 +4,7 @@ from copy import deepcopy
 from urllib.parse import urlparse
 
 from .extractors.csv_extractor import CsvExtractor
+from .extractors.json_extractor import JsonExtractor
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -54,6 +55,7 @@ def _http_url(value):
 
 # Entries are (constructor, required options, option validators). No dynamic imports.
 _EXTRACTORS = {
+    "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
     "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
 _TRANSFORMERS = {}
 _LOADERS = {}

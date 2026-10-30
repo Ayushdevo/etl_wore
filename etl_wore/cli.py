@@ -21,6 +21,8 @@ def main(argv=None):
 
     parser.add_argument("--summary", choices=("human", "json"), default="human", help="Summary output format")
 
+    parser.add_argument("--batch-size", type=int, help="Override the specification batch size")
+
     args = parser.parse_args(argv)
     logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
     if not args.spec:
@@ -29,6 +31,8 @@ def main(argv=None):
 
     try:
         spec = SpecParser.parse_file(args.spec)
+        if args.batch_size is not None:
+            spec["batch_size"] = args.batch_size
         pipeline = build_pipeline(spec, base_dir=Path(args.spec).resolve().parent)
     except EtlException as exc:
         parser.error(str(exc))

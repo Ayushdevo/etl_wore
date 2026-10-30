@@ -66,3 +66,27 @@ def test_json_summary_stdout_can_be_parsed_without_stripping_logs(tmp_path):
     assert summary["pipeline"] == "customers"
     assert (summary["extracted"], summary["loaded"], summary["dropped"]) == (3, 2, 1)
     assert "Starting pipeline" in result.stderr
+
+
+
+@pytest.mark.parametrize("size", ["0", "-1"])
+def test_invalid_batch_override_does_not_write(tmp_path, size):
+    path = make_spec(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        main(["--spec", str(path), "--batch-size", size])
+    assert exc.value.code == 2
+    assert not (tmp_path / "out.jsonl").exists()
+
+
+def test_batch_override_controls_flush_boundaries(tmp_path):
+    from unittest.mock import patch
+    from etl_wore.loaders.json_loader import JsonLinesLoader
+    path = make_spec(tmp_path)
+    batches = []
+    real_load = JsonLinesLoader.load
+    def observe(loader, records):
+        batches.append(len(records))
+        real_load(loader, records)
+    with patch.object(JsonLinesLoader, "load", observe):
+        main(["--spec", str(path), "--batch-size", "2"])
+    assert batches == [2]

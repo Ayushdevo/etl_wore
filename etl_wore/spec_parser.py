@@ -4,6 +4,15 @@ import os
 from typing import Dict, Any
 from .exceptions import ConfigurationError
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ConfigurationError(f"Duplicate specification key: {key}")
+        result[key] = value
+    return result
+
+
 class SpecParser:
     @staticmethod
     def parse_file(filepath: str) -> Dict[str, Any]:
@@ -13,7 +22,7 @@ class SpecParser:
         try:
             with open(filepath, "r", encoding="utf-8") as source:
                 if ext == ".json":
-                    spec = json.load(source)
+                    spec = json.load(source, object_pairs_hook=_unique_object)
                 else:
                     try:
                         import yaml

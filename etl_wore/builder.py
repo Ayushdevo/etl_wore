@@ -79,7 +79,7 @@ def _schema_validator(schema, drop_invalid=False):
 
 # Entries are (constructor, required options, option validators). No dynamic imports.
 _EXTRACTORS = {
-    "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string}),
+    "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string, "max_pages": _positive_int}),
     "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
     "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
 _TRANSFORMERS = {

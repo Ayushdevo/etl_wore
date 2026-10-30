@@ -8,11 +8,14 @@ from ..exceptions import ExtractionError
 from ..utils.retry import retry
 
 class RestApiExtractor(BaseExtractor):
-    def __init__(self, endpoint: str, headers: Optional[Dict[str, str]] = None, page_param: str = "page"):
+    def __init__(self, endpoint: str, headers: Optional[Dict[str, str]] = None, page_param: str = "page", max_pages: Optional[int] = None):
         super().__init__(name=f"RestApiExtractor({endpoint})")
         self.endpoint = endpoint
         self.headers = headers or {}
         self.page_param = page_param
+        if max_pages is not None and (isinstance(max_pages, bool) or not isinstance(max_pages, int) or max_pages < 1):
+            raise ValueError("max_pages must be a positive integer or None")
+        self.max_pages = max_pages
 
     @retry(max_attempts=3, initial_delay=1.0)
     def _fetch_page(self, page: int) -> Dict[str, Any]:
@@ -24,6 +27,8 @@ class RestApiExtractor(BaseExtractor):
     def extract(self) -> Generator[Dict[str, Any], None, None]:
         page = 1
         while True:
+            if self.max_pages is not None and page > self.max_pages:
+                raise ExtractionError(f"REST pagination exceeded max_pages={self.max_pages} without reaching an empty page")
             try:
                 data = self._fetch_page(page)
             except Exception as e:

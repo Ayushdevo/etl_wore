@@ -8,6 +8,7 @@ from .extractors.json_extractor import JsonExtractor
 from .extractors.api_extractor import RestApiExtractor
 from .transformers.sanitizer import DataSanitizer
 from .transformers.schema_validator import SchemaValidator
+from .transformers.deduplicator import DeduplicationTransformer
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -76,6 +77,7 @@ _EXTRACTORS = {
     "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
     "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
 _TRANSFORMERS = {
+    "deduplicate": (DeduplicationTransformer, ['key_fields'], {"key_fields": lambda value: _strings(value) and bool(value)}),
     "schema": (_schema_validator, ['schema'], {"schema": _schema, "drop_invalid": _boolean}),
     "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
 _LOADERS = {}

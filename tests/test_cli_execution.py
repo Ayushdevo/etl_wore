@@ -55,3 +55,14 @@ def test_module_entry_point_runs_the_pipeline(tmp_path):
     result = subprocess.run([sys.executable, "-m", "etl_wore", "--spec", str(path)], cwd=tmp_path, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     assert len((tmp_path / "out.jsonl").read_text().splitlines()) == 2
+
+
+
+def test_json_summary_stdout_can_be_parsed_without_stripping_logs(tmp_path):
+    path = make_spec(tmp_path)
+    result = subprocess.run([sys.executable, "-m", "etl_wore", "--spec", str(path), "--summary", "json"], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    summary = json.loads(result.stdout)
+    assert summary["pipeline"] == "customers"
+    assert (summary["extracted"], summary["loaded"], summary["dropped"]) == (3, 2, 1)
+    assert "Starting pipeline" in result.stderr

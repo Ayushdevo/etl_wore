@@ -2,6 +2,7 @@
 Command-line interface for running etl_wore pipelines.
 """
 import argparse
+import json
 import logging
 import sys
 from pathlib import Path
@@ -17,6 +18,8 @@ def main(argv=None):
     parser.add_argument("--spec", type=str, help="Path to pipeline specification file (JSON/YAML)")
     parser.add_argument("--dry-run", action="store_true", help="Validate specification without running")
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging")
+
+    parser.add_argument("--summary", choices=("human", "json"), default="human", help="Summary output format")
 
     args = parser.parse_args(argv)
     logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
@@ -34,9 +37,14 @@ def main(argv=None):
         logger.info("Dry run check passed successfully.")
         sys.exit(0)
     try:
-        pipeline.run()
+        context = pipeline.run()
     except EtlException as exc:
         parser.error(str(exc))
+    if args.summary == "json":
+        print(json.dumps(context.summary(), allow_nan=False))
+    else:
+        summary = context.summary()
+        print(f"{summary['pipeline']}: extracted={summary['extracted']} loaded={summary['loaded']} dropped={summary['dropped']}")
     return 0
 
 if __name__ == "__main__":

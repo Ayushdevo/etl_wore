@@ -12,6 +12,7 @@ from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.date_normalizer import DateNormalizer
 from .loaders.csv_loader import CsvLoader
 from .loaders.json_loader import JsonLinesLoader
+from .loaders.sqlite_loader import SqliteLoader
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -85,6 +86,7 @@ _TRANSFORMERS = {
     "schema": (_schema_validator, ['schema'], {"schema": _schema, "drop_invalid": _boolean}),
     "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
 _LOADERS = {
+    "sqlite": (SqliteLoader, ['db_path', 'table_name'], {"db_path": _string, "table_name": _string}),
     "jsonl": (JsonLinesLoader, ['output_path'], {"output_path": _string}),
     "csv": (CsvLoader, ['output_path'], {"output_path": _string, "delimiter": _delimiter}),}
 

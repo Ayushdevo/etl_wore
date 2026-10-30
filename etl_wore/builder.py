@@ -182,12 +182,19 @@ def _component(entry, registry, location, base_dir=None):
         if name not in options:
             raise ConfigurationError(f"{location}: missing required option {name}")
     for name, value in options.items():
-        if not validators[name](value):
+        try:
+            valid = validators[name](value)
+        except (TypeError, ValueError, OverflowError):
+            valid = False
+        if not valid:
             raise ConfigurationError(f"{location}: invalid option {name}")
     if base_dir is not None:
         for name in ("filepath", "output_path", "db_path"):
             if name in options:
-                options[name] = str((Path(base_dir) / options[name]).resolve())
+                try:
+                    options[name] = str((Path(base_dir) / options[name]).resolve())
+                except (OSError, ValueError, RuntimeError) as exc:
+                    raise ConfigurationError(f"{location}: invalid {name}: {exc}") from exc
     try:
         return constructor(**options)
     except (TypeError, ValueError) as exc:
@@ -195,8 +202,11 @@ def _component(entry, registry, location, base_dir=None):
 
 
 def _same_path(left, right):
-    if Path(left).resolve() == Path(right).resolve():
-        return True
+    try:
+        if Path(left).resolve() == Path(right).resolve():
+            return True
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise ConfigurationError(f"Invalid file path: {exc}") from exc
     try:
         return os.path.samefile(left, right)
     except OSError:
@@ -224,7 +234,7 @@ def _validate_destinations(pipeline):
 
 
 def build_pipeline(spec, base_dir=None):
-    """Build built-in components; no input, output, or network I/O is performed."""
+    """Build components without reading records, writing outputs or making network requests."""
     validate_spec(spec)
     base_dir = Path.cwd() if base_dir is None else Path(base_dir)
     pipeline = Pipeline(spec["name"], batch_size=spec.get("batch_size", 500))

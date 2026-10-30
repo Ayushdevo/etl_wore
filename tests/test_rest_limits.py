@@ -47,3 +47,8 @@ def test_timeout_is_forwarded_to_each_request():
 def test_invalid_timeout_is_rejected_before_network(timeout):
     with pytest.raises(ValueError):
         RestApiExtractor("https://example.test/items", timeout=timeout)
+
+
+def test_timeout_too_large_for_float_is_a_value_error():
+    with pytest.raises(ValueError, match="timeout"):
+        RestApiExtractor("https://example.test/items", timeout=10**1000)

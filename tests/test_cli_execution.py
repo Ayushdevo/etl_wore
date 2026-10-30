@@ -160,3 +160,11 @@ def test_failed_metrics_replace_preserves_previous_report(tmp_path):
             write_metrics(PipelineContext("test"), path)
     assert path.read_text() == "previous"
     assert list(tmp_path.iterdir()) == [path]
+
+
+def test_invalid_metrics_path_is_a_cli_error_before_execution(tmp_path):
+    path = make_spec(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        main(["--spec", str(path), "--metrics-path", "bad\0path"])
+    assert exc.value.code == 2
+    assert not (tmp_path / "out.jsonl").exists()

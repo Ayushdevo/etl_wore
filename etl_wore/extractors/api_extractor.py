@@ -30,14 +30,14 @@ class RestApiExtractor(BaseExtractor):
         ):
             raise ValueError("max_pages must be a positive integer or None")
         self.max_pages = max_pages
-        if (
-            isinstance(timeout, bool)
-            or not isinstance(timeout, (int, float))
-            or not math.isfinite(timeout)
-            or timeout <= 0
-        ):
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)):
             raise ValueError("timeout must be a finite positive number")
-        self.timeout = timeout
+        try:
+            self.timeout = float(timeout)
+        except OverflowError as exc:
+            raise ValueError("timeout must be a finite positive number") from exc
+        if not math.isfinite(self.timeout) or self.timeout <= 0:
+            raise ValueError("timeout must be a finite positive number")
 
     @retry(max_attempts=3, initial_delay=1.0)
     def _fetch_page(self, page: int) -> Dict[str, Any]:

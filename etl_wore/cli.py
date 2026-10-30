@@ -6,7 +6,9 @@ import json
 import logging
 import sys
 from pathlib import Path
-from .builder import build_pipeline
+from .builder import build_pipeline, _same_path
+from .metrics import write_metrics
+from .exceptions import ConfigurationError
 from .logger import setup_logger
 from .spec_parser import SpecParser
 from .exceptions import EtlException
@@ -23,6 +25,8 @@ def main(argv=None):
 
     parser.add_argument("--batch-size", type=int, help="Override the specification batch size")
 
+    parser.add_argument("--metrics-path", help="Write successful-run metrics as JSON")
+
     args = parser.parse_args(argv)
     logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
     if not args.spec:
@@ -34,6 +38,12 @@ def main(argv=None):
         if args.batch_size is not None:
             spec["batch_size"] = args.batch_size
         pipeline = build_pipeline(spec, base_dir=Path(args.spec).resolve().parent)
+        if args.metrics_path:
+            protected = [getattr(component, name) for component in pipeline.extractors + pipeline.loaders
+                         for name in ("filepath", "output_path", "db_path") if hasattr(component, name)]
+            protected.append(args.spec)
+            if any(_same_path(args.metrics_path, path) for path in protected):
+                raise ConfigurationError("Metrics destination must differ from the specification, inputs, and outputs")
     except EtlException as exc:
         parser.error(str(exc))
     logger.info(f"Loaded specification from: {args.spec}")
@@ -42,7 +52,9 @@ def main(argv=None):
         sys.exit(0)
     try:
         context = pipeline.run()
-    except EtlException as exc:
+        if args.metrics_path:
+            write_metrics(context, args.metrics_path)
+    except (EtlException, OSError) as exc:
         parser.error(str(exc))
     if args.summary == "json":
         print(json.dumps(context.summary(), allow_nan=False))

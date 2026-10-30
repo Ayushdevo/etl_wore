@@ -90,3 +90,34 @@ def test_batch_override_controls_flush_boundaries(tmp_path):
     with patch.object(JsonLinesLoader, "load", observe):
         main(["--spec", str(path), "--batch-size", "2"])
     assert batches == [2]
+
+
+
+def test_metrics_report_matches_stdout(tmp_path):
+    path = make_spec(tmp_path)
+    metrics = tmp_path / "reports" / "run.json"
+    result = subprocess.run([sys.executable, "-m", "etl_wore", "--spec", str(path), "--summary", "json", "--metrics-path", str(metrics)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert json.loads(metrics.read_text()) == json.loads(result.stdout)
+
+
+@pytest.mark.parametrize("target", ["pipeline.json", "input.csv", "out.jsonl"])
+def test_metrics_cannot_overwrite_pipeline_files(tmp_path, target):
+    path = make_spec(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        main(["--spec", str(path), "--metrics-path", str(tmp_path / target)])
+    assert exc.value.code == 2
+    assert not (tmp_path / "out.jsonl").exists()
+
+
+def test_failed_metrics_replace_preserves_previous_report(tmp_path):
+    from unittest.mock import patch
+    from etl_wore.metrics import write_metrics
+    from etl_wore.pipeline.context import PipelineContext
+    path = tmp_path / "metrics.json"
+    path.write_text("previous")
+    with patch("etl_wore.metrics.os.replace", side_effect=OSError("full")):
+        with pytest.raises(OSError):
+            write_metrics(PipelineContext("test"), path)
+    assert path.read_text() == "previous"
+    assert list(tmp_path.iterdir()) == [path]

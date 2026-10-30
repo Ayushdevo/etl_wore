@@ -1,12 +1,18 @@
 from unittest.mock import Mock, patch
+
 import pytest
+
+from etl_wore.builder import _EXTRACTORS, _component
+from etl_wore.exceptions import ExtractionError
 from etl_wore.extractors.api_extractor import RestApiExtractor
-from etl_wore.builder import _component, _EXTRACTORS
-from etl_wore.exceptions import ExtractionError, ConfigurationError
 
 
 def test_nonterminating_endpoint_stops_at_request_limit():
-    source = _component({"type": "rest", "endpoint": "https://example.test/items", "max_pages": 2}, _EXTRACTORS, "source")
+    source = _component(
+        {"type": "rest", "endpoint": "https://example.test/items", "max_pages": 2},
+        _EXTRACTORS,
+        "source",
+    )
     source._fetch_page = Mock(return_value=[{"id": 1}])
     with pytest.raises(ExtractionError, match="max_pages=2"):
         list(source.extract())
@@ -25,9 +31,12 @@ def test_request_limit_is_a_positive_integer(limit):
         RestApiExtractor("https://example.test/items", max_pages=limit)
 
 
-
 def test_timeout_is_forwarded_to_each_request():
-    source = _component({"type": "rest", "endpoint": "https://example.test/items", "timeout": 0.25}, _EXTRACTORS, "source")
+    source = _component(
+        {"type": "rest", "endpoint": "https://example.test/items", "timeout": 0.25},
+        _EXTRACTORS,
+        "source",
+    )
     with patch("etl_wore.extractors.api_extractor.requests.get") as get:
         get.return_value.json.return_value = []
         assert list(source.extract()) == []

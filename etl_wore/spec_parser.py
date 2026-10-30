@@ -1,9 +1,12 @@
 """Declarative JSON/YAML pipeline specification parser."""
+
 import json
 import math
 import os
-from typing import Dict, Any
+from typing import Any, Dict
+
 from .exceptions import ConfigurationError
+
 
 def _unique_object(pairs):
     result = {}
@@ -36,24 +39,37 @@ class SpecParser:
         try:
             with open(filepath, "r", encoding="utf-8-sig") as source:
                 if ext == ".json":
-                    spec = json.load(source, object_pairs_hook=_unique_object, parse_float=_finite_float, parse_constant=_reject_constant)
+                    spec = json.load(
+                        source,
+                        object_pairs_hook=_unique_object,
+                        parse_float=_finite_float,
+                        parse_constant=_reject_constant,
+                    )
                 else:
                     try:
                         import yaml
                     except ImportError as exc:
-                        raise ConfigurationError("PyYAML is required to parse YAML specifications") from exc
+                        raise ConfigurationError(
+                            "PyYAML is required to parse YAML specifications"
+                        ) from exc
                     try:
+
                         class UniqueSafeLoader(yaml.SafeLoader):
                             pass
 
                         def construct_mapping(loader, node, deep=False):
                             loader.flatten_mapping(node)
                             return _unique_object(
-                                (loader.construct_object(key, deep=deep), loader.construct_object(value, deep=deep))
+                                (
+                                    loader.construct_object(key, deep=deep),
+                                    loader.construct_object(value, deep=deep),
+                                )
                                 for key, value in node.value
                             )
 
-                        UniqueSafeLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping)
+                        UniqueSafeLoader.add_constructor(
+                            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
+                        )
                         spec = yaml.load(source, Loader=UniqueSafeLoader)
                     except yaml.YAMLError as exc:
                         raise ConfigurationError(f"Invalid YAML specification: {exc}") from exc

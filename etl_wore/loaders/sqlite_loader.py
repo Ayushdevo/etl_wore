@@ -1,11 +1,14 @@
 """
 SQLite destination loader with dynamic table creation.
 """
-import sqlite3
+
 import os
-from typing import List, Dict, Any
-from .base import BaseLoader
+import sqlite3
+from typing import Any, Dict, List
+
 from ..exceptions import LoadingError
+from .base import BaseLoader
+
 
 class SqliteLoader(BaseLoader):
     def __init__(self, db_path: str, table_name: str):
@@ -27,6 +30,7 @@ class SqliteLoader(BaseLoader):
         columns = list(records[0].keys())
         if any(set(record) - set(columns) for record in records):
             raise LoadingError("Record contains columns absent from the first SQLite batch record")
+
         def quote(identifier):
             return '"' + identifier.replace('"', '""') + '"'
 
@@ -44,11 +48,16 @@ class SqliteLoader(BaseLoader):
                 # Include schema changes in the same transaction as the batch.
                 conn.execute("BEGIN")
                 conn.execute(create_sql)
-                existing_columns = {row[1].casefold() for row in conn.execute(f"PRAGMA table_info({table})")}
+                existing_columns = {
+                    row[1].casefold() for row in conn.execute(f"PRAGMA table_info({table})")
+                }
                 for column in columns:
                     if column.casefold() not in existing_columns:
                         conn.execute(f"ALTER TABLE {table} ADD COLUMN {quote(column)} TEXT")
-                rows = [[None if r.get(c, "") is None else str(r.get(c, "")) for c in columns] for r in records]
+                rows = [
+                    [None if r.get(c, "") is None else str(r.get(c, "")) for c in columns]
+                    for r in records
+                ]
                 conn.executemany(insert_sql, rows)
         except Exception as e:
             raise LoadingError(f"Failed to insert into SQLite table {self.table_name}: {e}") from e
@@ -57,4 +66,3 @@ class SqliteLoader(BaseLoader):
         if self._conn:
             self._conn.close()
             self._conn = None
-

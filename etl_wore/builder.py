@@ -1,23 +1,24 @@
 """Construct pipelines from a closed, validated set of built-in components."""
+
 import codecs
+import math
+import os
 from copy import deepcopy
 from pathlib import Path
-import os
-import math
 from urllib.parse import urlparse
 
+from .exceptions import ConfigurationError
+from .extractors.api_extractor import RestApiExtractor
 from .extractors.csv_extractor import CsvExtractor
 from .extractors.json_extractor import JsonExtractor
-from .extractors.api_extractor import RestApiExtractor
-from .transformers.sanitizer import DataSanitizer
-from .transformers.schema_validator import SchemaValidator
-from .transformers.deduplicator import DeduplicationTransformer
-from .transformers.date_normalizer import DateNormalizer
 from .loaders.csv_loader import CsvLoader
 from .loaders.json_loader import JsonLinesLoader
 from .loaders.sqlite_loader import SqliteLoader
-from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
+from .transformers.date_normalizer import DateNormalizer
+from .transformers.deduplicator import DeduplicationTransformer
+from .transformers.sanitizer import DataSanitizer
+from .transformers.schema_validator import SchemaValidator
 
 
 def _string(value):
@@ -33,7 +34,12 @@ def _positive_int(value):
 
 
 def _positive_number(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value > 0
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+        and value > 0
+    )
 
 
 def _strings(value):
@@ -55,7 +61,9 @@ def _encoding(value):
 
 
 def _headers(value):
-    return isinstance(value, dict) and all(_string(key) and isinstance(item, str) for key, item in value.items())
+    return isinstance(value, dict) and all(
+        _string(key) and isinstance(item, str) for key, item in value.items()
+    )
 
 
 def _http_url(value):
@@ -72,30 +80,69 @@ _SCHEMA_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 
 
 def _schema(value):
-    return isinstance(value, dict) and bool(value) and all(
-        _string(key) and isinstance(kind, str) and kind in _SCHEMA_TYPES
-        for key, kind in value.items()
+    return (
+        isinstance(value, dict)
+        and bool(value)
+        and all(
+            _string(key) and isinstance(kind, str) and kind in _SCHEMA_TYPES
+            for key, kind in value.items()
+        )
     )
 
 
 def _schema_validator(schema, drop_invalid=False):
-    return SchemaValidator({key: _SCHEMA_TYPES[kind] for key, kind in schema.items()}, drop_invalid=drop_invalid)
+    return SchemaValidator(
+        {key: _SCHEMA_TYPES[kind] for key, kind in schema.items()}, drop_invalid=drop_invalid
+    )
 
 
 # Entries are (constructor, required options, option validators). No dynamic imports.
 _EXTRACTORS = {
-    "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string, "max_pages": _positive_int, "timeout": _positive_number}),
-    "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
-    "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
+    "rest": (
+        RestApiExtractor,
+        ["endpoint"],
+        {
+            "endpoint": _http_url,
+            "headers": _headers,
+            "page_param": _string,
+            "max_pages": _positive_int,
+            "timeout": _positive_number,
+        },
+    ),
+    "json": (
+        JsonExtractor,
+        ["filepath"],
+        {"filepath": _string, "is_lines": _boolean, "encoding": _encoding},
+    ),
+    "csv": (
+        CsvExtractor,
+        ["filepath"],
+        {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding},
+    ),
+}
 _TRANSFORMERS = {
-    "dates": (DateNormalizer, ['date_fields'], {"date_fields": lambda value: _strings(value) and bool(value), "output_format": _string}),
-    "deduplicate": (DeduplicationTransformer, ['key_fields'], {"key_fields": lambda value: _strings(value) and bool(value)}),
-    "schema": (_schema_validator, ['schema'], {"schema": _schema, "drop_invalid": _boolean}),
-    "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
+    "dates": (
+        DateNormalizer,
+        ["date_fields"],
+        {"date_fields": lambda value: _strings(value) and bool(value), "output_format": _string},
+    ),
+    "deduplicate": (
+        DeduplicationTransformer,
+        ["key_fields"],
+        {"key_fields": lambda value: _strings(value) and bool(value)},
+    ),
+    "schema": (_schema_validator, ["schema"], {"schema": _schema, "drop_invalid": _boolean}),
+    "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),
+}
 _LOADERS = {
-    "sqlite": (SqliteLoader, ['db_path', 'table_name'], {"db_path": _string, "table_name": _string}),
-    "jsonl": (JsonLinesLoader, ['output_path'], {"output_path": _string}),
-    "csv": (CsvLoader, ['output_path'], {"output_path": _string, "delimiter": _delimiter}),}
+    "sqlite": (
+        SqliteLoader,
+        ["db_path", "table_name"],
+        {"db_path": _string, "table_name": _string},
+    ),
+    "jsonl": (JsonLinesLoader, ["output_path"], {"output_path": _string}),
+    "csv": (CsvLoader, ["output_path"], {"output_path": _string, "delimiter": _delimiter}),
+}
 
 
 def validate_spec(spec):
@@ -117,7 +164,9 @@ def validate_spec(spec):
             raise ConfigurationError(f"{section} must contain at least one component")
         for index, entry in enumerate(entries):
             if not isinstance(entry, dict) or not _string(entry.get("type")):
-                raise ConfigurationError(f"{section}[{index}] must be a mapping with a nonempty type")
+                raise ConfigurationError(
+                    f"{section}[{index}] must be a mapping with a nonempty type"
+                )
 
 
 def _component(entry, registry, location, base_dir=None):
@@ -165,7 +214,8 @@ def _validate_destinations(pipeline):
             previous_target = getattr(previous, "output_path", getattr(previous, "db_path", None))
             if _same_path(target, previous_target):
                 distinct_tables = (
-                    isinstance(sink, SqliteLoader) and isinstance(previous, SqliteLoader)
+                    isinstance(sink, SqliteLoader)
+                    and isinstance(previous, SqliteLoader)
                     and sink.table_name.casefold() != previous.table_name.casefold()
                 )
                 if not distinct_tables:

@@ -1,13 +1,18 @@
-from copy import deepcopy
 import json
-from pathlib import Path
+from copy import deepcopy
+
 import pytest
+
 from etl_wore.builder import build_pipeline
 from etl_wore.exceptions import ConfigurationError
 
 
 def spec(source="in.json", target="out.jsonl"):
-    return {"name": "relative", "extractors": [{"type": "json", "filepath": source}], "loaders": [{"type": "jsonl", "output_path": target}]}
+    return {
+        "name": "relative",
+        "extractors": [{"type": "json", "filepath": source}],
+        "loaders": [{"type": "jsonl", "output_path": target}],
+    }
 
 
 def test_relative_paths_are_resolved_from_explicit_base(tmp_path, monkeypatch):
@@ -41,11 +46,11 @@ def test_hard_link_alias_cannot_be_a_destination(tmp_path):
     source.write_text('[{"id":1}]')
     alias = tmp_path / "out.jsonl"
     import os
+
     os.link(source, alias)
     with pytest.raises(ConfigurationError, match="input source"):
         build_pipeline(spec(), base_dir=tmp_path)
     assert source.read_text() == '[{"id":1}]'
-
 
 
 def test_duplicate_sinks_do_not_append_each_record_twice(tmp_path):
@@ -58,7 +63,9 @@ def test_duplicate_sinks_do_not_append_each_record_twice(tmp_path):
 
 def test_distinct_sqlite_tables_may_share_a_database(tmp_path):
     config = spec()
-    config["loaders"] = [{"type": "sqlite", "db_path": "out.db", "table_name": name} for name in ["a", "b"]]
+    config["loaders"] = [
+        {"type": "sqlite", "db_path": "out.db", "table_name": name} for name in ["a", "b"]
+    ]
     assert len(build_pipeline(config, base_dir=tmp_path).loaders) == 2
     config["loaders"][1]["table_name"] = "A"
     with pytest.raises(ConfigurationError, match="destinations must be distinct"):

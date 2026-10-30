@@ -1,4 +1,4 @@
-from etl_wore.builder import _component, _TRANSFORMERS
+from etl_wore.builder import _TRANSFORMERS, _component
 
 
 def test_deduplication_handles_nested_keys_and_fresh_runs():

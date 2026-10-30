@@ -1,15 +1,18 @@
 """
 Core Pipeline execution engine.
 """
+
 import sys
 from typing import List
+
 from ..extractors.base import BaseExtractor
-from ..transformers.base import BaseTransformer
 from ..loaders.base import BaseLoader
-from .context import PipelineContext
 from ..logger import setup_logger
+from ..transformers.base import BaseTransformer
+from .context import PipelineContext
 
 logger = setup_logger("etl_wore.pipeline.engine")
+
 
 class Pipeline:
     def __init__(self, name: str, batch_size: int = 500):
@@ -21,15 +24,15 @@ class Pipeline:
         self.transformers: List[BaseTransformer] = []
         self.loaders: List[BaseLoader] = []
 
-    def add_extractor(self, extractor: BaseExtractor) -> 'Pipeline':
+    def add_extractor(self, extractor: BaseExtractor) -> "Pipeline":
         self.extractors.append(extractor)
         return self
 
-    def add_transformer(self, transformer: BaseTransformer) -> 'Pipeline':
+    def add_transformer(self, transformer: BaseTransformer) -> "Pipeline":
         self.transformers.append(transformer)
         return self
 
-    def add_loader(self, loader: BaseLoader) -> 'Pipeline':
+    def add_loader(self, loader: BaseLoader) -> "Pipeline":
         self.loaders.append(loader)
         return self
 

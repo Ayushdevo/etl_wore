@@ -1,6 +1,8 @@
 from copy import deepcopy
+
 import pytest
-from etl_wore.builder import _component, _TRANSFORMERS
+
+from etl_wore.builder import _TRANSFORMERS, _component
 from etl_wore.exceptions import ConfigurationError
 
 
@@ -12,7 +14,9 @@ def test_sanitizer_isolates_input_and_masks_selected_fields():
     assert record == before
 
 
-@pytest.mark.parametrize("options", [{"strip_strings": "false"}, {"mask_fields": "ssn"}, {"mask_fields": [None]}])
+@pytest.mark.parametrize(
+    "options", [{"strip_strings": "false"}, {"mask_fields": "ssn"}, {"mask_fields": [None]}]
+)
 def test_sanitizer_configuration_is_typed(options):
     with pytest.raises(ConfigurationError):
         _component(dict(type="sanitize", **options), _TRANSFORMERS, "stage")

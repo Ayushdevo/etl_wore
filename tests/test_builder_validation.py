@@ -1,5 +1,7 @@
 from copy import deepcopy
+
 import pytest
+
 from etl_wore.builder import build_pipeline, validate_spec
 from etl_wore.exceptions import ConfigurationError
 
@@ -8,11 +10,21 @@ def envelope():
     return {"name": "demo", "extractors": [{"type": "csv"}], "loaders": [{"type": "jsonl"}]}
 
 
-@pytest.mark.parametrize("change", [
-    {"name": " "}, {"batch_size": True}, {"batch_size": 0}, {"batch_size": "2"},
-    {"extractors": []}, {"loaders": []}, {"transformers": {}},
-    {"extractors": [None]}, {"loaders": [{"type": 2}]}, {"typo": True},
-])
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"name": " "},
+        {"batch_size": True},
+        {"batch_size": 0},
+        {"batch_size": "2"},
+        {"extractors": []},
+        {"loaders": []},
+        {"transformers": {}},
+        {"extractors": [None]},
+        {"loaders": [{"type": 2}]},
+        {"typo": True},
+    ],
+)
 def test_invalid_envelope_is_rejected(change):
     spec = envelope()
     spec.update(change)

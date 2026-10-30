@@ -1,27 +1,33 @@
 """
 Command-line interface for running etl_wore pipelines.
 """
+
 import argparse
 import json
 import logging
 import sys
 from pathlib import Path
-from .builder import build_pipeline, _same_path
-from .metrics import write_metrics
-from .exceptions import ConfigurationError
+
+from .builder import _same_path, build_pipeline
+from .exceptions import ConfigurationError, EtlException
 from .logger import setup_logger
+from .metrics import write_metrics
 from .spec_parser import SpecParser
-from .exceptions import EtlException
 
 logger = setup_logger("etl_wore.cli")
+
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="etl_wore CLI runner")
     parser.add_argument("--spec", type=str, help="Path to pipeline specification file (JSON/YAML)")
-    parser.add_argument("--dry-run", action="store_true", help="Validate specification without running")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Validate specification without running"
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging")
 
-    parser.add_argument("--summary", choices=("human", "json"), default="human", help="Summary output format")
+    parser.add_argument(
+        "--summary", choices=("human", "json"), default="human", help="Summary output format"
+    )
 
     parser.add_argument("--batch-size", type=int, help="Override the specification batch size")
 
@@ -39,11 +45,17 @@ def main(argv=None):
             spec["batch_size"] = args.batch_size
         pipeline = build_pipeline(spec, base_dir=Path(args.spec).resolve().parent)
         if args.metrics_path:
-            protected = [getattr(component, name) for component in pipeline.extractors + pipeline.loaders
-                         for name in ("filepath", "output_path", "db_path") if hasattr(component, name)]
+            protected = [
+                getattr(component, name)
+                for component in pipeline.extractors + pipeline.loaders
+                for name in ("filepath", "output_path", "db_path")
+                if hasattr(component, name)
+            ]
             protected.append(args.spec)
             if any(_same_path(args.metrics_path, path) for path in protected):
-                raise ConfigurationError("Metrics destination must differ from the specification, inputs, and outputs")
+                raise ConfigurationError(
+                    "Metrics destination must differ from the specification, inputs, and outputs"
+                )
     except EtlException as exc:
         parser.error(str(exc))
     logger.info(f"Loaded specification from: {args.spec}")
@@ -60,9 +72,11 @@ def main(argv=None):
         print(json.dumps(context.summary(), allow_nan=False))
     else:
         summary = context.summary()
-        print(f"{summary['pipeline']}: extracted={summary['extracted']} loaded={summary['loaded']} dropped={summary['dropped']}")
+        print(
+            f"{summary['pipeline']}: extracted={summary['extracted']} loaded={summary['loaded']} dropped={summary['dropped']}"
+        )
     return 0
+
 
 if __name__ == "__main__":
     main()
-

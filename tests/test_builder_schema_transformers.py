@@ -1,10 +1,15 @@
 import pytest
-from etl_wore.builder import _component, _TRANSFORMERS
-from etl_wore.exceptions import ConfigurationError, TransformationError
+
+from etl_wore.builder import _TRANSFORMERS, _component
+from etl_wore.exceptions import ConfigurationError
 
 
 def test_schema_casts_serializable_types_and_drops_invalid_rows():
-    stage = _component({"type": "schema", "schema": {"age": "int", "active": "bool"}, "drop_invalid": True}, _TRANSFORMERS, "stage")
+    stage = _component(
+        {"type": "schema", "schema": {"age": "int", "active": "bool"}, "drop_invalid": True},
+        _TRANSFORMERS,
+        "stage",
+    )
     assert stage.transform({"age": "21", "active": "false"}) == {"age": 21, "active": False}
     assert stage.transform({"age": "bad", "active": "true"}) is None
 

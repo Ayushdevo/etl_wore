@@ -1,6 +1,7 @@
 """Construct pipelines from a closed, validated set of built-in components."""
 import codecs
 from copy import deepcopy
+from pathlib import Path
 from urllib.parse import urlparse
 
 from .extractors.csv_extractor import CsvExtractor
@@ -113,7 +114,7 @@ def validate_spec(spec):
                 raise ConfigurationError(f"{section}[{index}] must be a mapping with a nonempty type")
 
 
-def _component(entry, registry, location):
+def _component(entry, registry, location, base_dir=None):
     kind = entry["type"]
     if kind not in registry:
         raise ConfigurationError(f"{location}: unsupported component type {kind!r}")
@@ -128,15 +129,20 @@ def _component(entry, registry, location):
     for name, value in options.items():
         if not validators[name](value):
             raise ConfigurationError(f"{location}: invalid option {name}")
+    if base_dir is not None:
+        for name in ("filepath", "output_path", "db_path"):
+            if name in options:
+                options[name] = str((Path(base_dir) / options[name]).resolve())
     try:
         return constructor(**options)
     except (TypeError, ValueError) as exc:
         raise ConfigurationError(f"{location}: {exc}") from exc
 
 
-def build_pipeline(spec):
+def build_pipeline(spec, base_dir=None):
     """Build built-in components; no input, output, or network I/O is performed."""
     validate_spec(spec)
+    base_dir = Path.cwd() if base_dir is None else Path(base_dir)
     pipeline = Pipeline(spec["name"], batch_size=spec.get("batch_size", 500))
     for section, registry, add in (
         ("extractors", _EXTRACTORS, pipeline.add_extractor),
@@ -144,5 +150,5 @@ def build_pipeline(spec):
         ("loaders", _LOADERS, pipeline.add_loader),
     ):
         for index, entry in enumerate(spec.get(section, [])):
-            add(_component(entry, registry, f"{section}[{index}]"))
+            add(_component(entry, registry, f"{section}[{index}]", base_dir=base_dir))
     return pipeline

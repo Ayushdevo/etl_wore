@@ -8,6 +8,8 @@ from .exceptions import ConfigurationError
 def _unique_object(pairs):
     result = {}
     for key, value in pairs:
+        if not isinstance(key, str):
+            raise ConfigurationError("Specification mapping keys must be strings")
         if key in result:
             raise ConfigurationError(f"Duplicate specification key: {key}")
         result[key] = value
@@ -41,7 +43,18 @@ class SpecParser:
                     except ImportError as exc:
                         raise ConfigurationError("PyYAML is required to parse YAML specifications") from exc
                     try:
-                        spec = yaml.safe_load(source)
+                        class UniqueSafeLoader(yaml.SafeLoader):
+                            pass
+
+                        def construct_mapping(loader, node, deep=False):
+                            loader.flatten_mapping(node)
+                            return _unique_object(
+                                (loader.construct_object(key, deep=deep), loader.construct_object(value, deep=deep))
+                                for key, value in node.value
+                            )
+
+                        UniqueSafeLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping)
+                        spec = yaml.load(source, Loader=UniqueSafeLoader)
                     except yaml.YAMLError as exc:
                         raise ConfigurationError(f"Invalid YAML specification: {exc}") from exc
         except (OSError, ValueError) as exc:

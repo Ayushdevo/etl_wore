@@ -24,3 +24,26 @@ def test_utf8_bom_specifications(tmp_path, suffix):
     path = tmp_path / ("pipeline." + suffix)
     path.write_text('{"name":"café"}', encoding="utf-8-sig")
     assert SpecParser.parse_file(path) == {"name": "café"}
+
+
+@pytest.mark.parametrize("text", ["name: one\nname: two\n", "options:\n  path: a\n  path: b\n"])
+def test_duplicate_yaml_keys_are_rejected(tmp_path, text):
+    path = tmp_path / "pipeline.yaml"
+    path.write_text(text)
+    with pytest.raises(ConfigurationError, match="Duplicate specification key"):
+        SpecParser.parse_file(path)
+
+
+def test_yaml_python_objects_are_not_constructed(tmp_path):
+    path = tmp_path / "pipeline.yaml"
+    path.write_text('!!python/object/apply:builtins.print ["unsafe"]')
+    with pytest.raises(ConfigurationError):
+        SpecParser.parse_file(path)
+
+
+@pytest.mark.parametrize("text", ["1: value", "? [a, b]\n: value"])
+def test_yaml_mapping_keys_must_be_strings(tmp_path, text):
+    path = tmp_path / "pipeline.yaml"
+    path.write_text(text)
+    with pytest.raises(ConfigurationError, match="keys must be strings"):
+        SpecParser.parse_file(path)

@@ -14,7 +14,7 @@ def test_dry_run_rejects_invalid_spec(tmp_path, monkeypatch, text):
 
 def test_dry_run_accepts_mapping(tmp_path, monkeypatch):
     path = tmp_path / "spec.json"
-    path.write_text('{"name":"demo"}')
+    path.write_text('{"name":"demo","extractors":[{"type":"csv","filepath":"missing.csv"}],"loaders":[{"type":"jsonl","output_path":"out.jsonl"}]}')
     monkeypatch.setattr(sys, "argv", ["etl-wore", "--spec", str(path), "--dry-run"])
     with pytest.raises(SystemExit) as exc:
         main()

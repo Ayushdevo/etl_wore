@@ -11,6 +11,7 @@ from .transformers.schema_validator import SchemaValidator
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.date_normalizer import DateNormalizer
 from .loaders.csv_loader import CsvLoader
+from .loaders.json_loader import JsonLinesLoader
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -84,6 +85,7 @@ _TRANSFORMERS = {
     "schema": (_schema_validator, ['schema'], {"schema": _schema, "drop_invalid": _boolean}),
     "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
 _LOADERS = {
+    "jsonl": (JsonLinesLoader, ['output_path'], {"output_path": _string}),
     "csv": (CsvLoader, ['output_path'], {"output_path": _string, "delimiter": _delimiter}),}
 
 

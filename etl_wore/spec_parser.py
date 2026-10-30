@@ -32,7 +32,7 @@ class SpecParser:
         if ext not in {".json", ".yaml", ".yml"}:
             raise ConfigurationError(f"Unsupported spec format: {ext}")
         try:
-            with open(filepath, "r", encoding="utf-8") as source:
+            with open(filepath, "r", encoding="utf-8-sig") as source:
                 if ext == ".json":
                     spec = json.load(source, object_pairs_hook=_unique_object, parse_float=_finite_float, parse_constant=_reject_constant)
                 else:

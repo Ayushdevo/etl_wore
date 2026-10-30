@@ -17,3 +17,10 @@ def test_nonfinite_json_options_are_rejected(tmp_path, number):
     path.write_text('{"option":' + number + '}')
     with pytest.raises(ConfigurationError):
         SpecParser.parse_file(path)
+
+
+@pytest.mark.parametrize("suffix", ["json", "yaml"])
+def test_utf8_bom_specifications(tmp_path, suffix):
+    path = tmp_path / ("pipeline." + suffix)
+    path.write_text('{"name":"café"}', encoding="utf-8-sig")
+    assert SpecParser.parse_file(path) == {"name": "café"}

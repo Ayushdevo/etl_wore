@@ -45,3 +45,21 @@ def test_hard_link_alias_cannot_be_a_destination(tmp_path):
     with pytest.raises(ConfigurationError, match="input source"):
         build_pipeline(spec(), base_dir=tmp_path)
     assert source.read_text() == '[{"id":1}]'
+
+
+
+def test_duplicate_sinks_do_not_append_each_record_twice(tmp_path):
+    config = spec()
+    config["loaders"].append({"type": "jsonl", "output_path": "./out.jsonl"})
+    with pytest.raises(ConfigurationError, match="destinations must be distinct"):
+        build_pipeline(config, base_dir=tmp_path)
+    assert not (tmp_path / "out.jsonl").exists()
+
+
+def test_distinct_sqlite_tables_may_share_a_database(tmp_path):
+    config = spec()
+    config["loaders"] = [{"type": "sqlite", "db_path": "out.db", "table_name": name} for name in ["a", "b"]]
+    assert len(build_pipeline(config, base_dir=tmp_path).loaders) == 2
+    config["loaders"][1]["table_name"] = "A"
+    with pytest.raises(ConfigurationError, match="destinations must be distinct"):
+        build_pipeline(config, base_dir=tmp_path)

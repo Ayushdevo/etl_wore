@@ -151,10 +151,21 @@ def _same_path(left, right):
 
 def _validate_destinations(pipeline):
     sources = [source.filepath for source in pipeline.extractors if hasattr(source, "filepath")]
+    destinations = []
     for sink in pipeline.loaders:
         target = getattr(sink, "output_path", getattr(sink, "db_path", None))
         if any(_same_path(source, target) for source in sources):
             raise ConfigurationError("An output destination must not overwrite an input source")
+        for previous in destinations:
+            previous_target = getattr(previous, "output_path", getattr(previous, "db_path", None))
+            if _same_path(target, previous_target):
+                distinct_tables = (
+                    isinstance(sink, SqliteLoader) and isinstance(previous, SqliteLoader)
+                    and sink.table_name.casefold() != previous.table_name.casefold()
+                )
+                if not distinct_tables:
+                    raise ConfigurationError("Output destinations must be distinct")
+        destinations.append(sink)
 
 
 def build_pipeline(spec, base_dir=None):

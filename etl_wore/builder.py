@@ -3,6 +3,7 @@ import codecs
 from copy import deepcopy
 from urllib.parse import urlparse
 
+from .extractors.csv_extractor import CsvExtractor
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -52,7 +53,8 @@ def _http_url(value):
 
 
 # Entries are (constructor, required options, option validators). No dynamic imports.
-_EXTRACTORS = {}
+_EXTRACTORS = {
+    "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
 _TRANSFORMERS = {}
 _LOADERS = {}
 

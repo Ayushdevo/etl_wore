@@ -2,6 +2,7 @@
 import codecs
 from copy import deepcopy
 from pathlib import Path
+import os
 from urllib.parse import urlparse
 
 from .extractors.csv_extractor import CsvExtractor
@@ -139,6 +140,23 @@ def _component(entry, registry, location, base_dir=None):
         raise ConfigurationError(f"{location}: {exc}") from exc
 
 
+def _same_path(left, right):
+    if Path(left).resolve() == Path(right).resolve():
+        return True
+    try:
+        return os.path.samefile(left, right)
+    except OSError:
+        return False
+
+
+def _validate_destinations(pipeline):
+    sources = [source.filepath for source in pipeline.extractors if hasattr(source, "filepath")]
+    for sink in pipeline.loaders:
+        target = getattr(sink, "output_path", getattr(sink, "db_path", None))
+        if any(_same_path(source, target) for source in sources):
+            raise ConfigurationError("An output destination must not overwrite an input source")
+
+
 def build_pipeline(spec, base_dir=None):
     """Build built-in components; no input, output, or network I/O is performed."""
     validate_spec(spec)
@@ -151,4 +169,5 @@ def build_pipeline(spec, base_dir=None):
     ):
         for index, entry in enumerate(spec.get(section, [])):
             add(_component(entry, registry, f"{section}[{index}]", base_dir=base_dir))
+    _validate_destinations(pipeline)
     return pipeline

@@ -27,3 +27,21 @@ def test_build_does_not_open_sources_or_create_destinations(tmp_path):
     pipeline = build_pipeline(spec(), base_dir=tmp_path / "absent")
     assert pipeline.extractors[0].filepath == str(tmp_path / "absent" / "in.json")
     assert not (tmp_path / "absent").exists()
+
+
+@pytest.mark.parametrize("target", ["in.json", "nested/../in.json"])
+def test_input_output_collisions_are_rejected_before_io(tmp_path, target):
+    with pytest.raises(ConfigurationError, match="input source"):
+        build_pipeline(spec(target=target), base_dir=tmp_path)
+    assert not any(tmp_path.iterdir())
+
+
+def test_hard_link_alias_cannot_be_a_destination(tmp_path):
+    source = tmp_path / "in.json"
+    source.write_text('[{"id":1}]')
+    alias = tmp_path / "out.jsonl"
+    import os
+    os.link(source, alias)
+    with pytest.raises(ConfigurationError, match="input source"):
+        build_pipeline(spec(), base_dir=tmp_path)
+    assert source.read_text() == '[{"id":1}]'

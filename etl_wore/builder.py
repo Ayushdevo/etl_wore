@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from .extractors.csv_extractor import CsvExtractor
 from .extractors.json_extractor import JsonExtractor
 from .extractors.api_extractor import RestApiExtractor
+from .transformers.sanitizer import DataSanitizer
 from .exceptions import ConfigurationError
 from .pipeline.engine import Pipeline
 
@@ -59,7 +60,8 @@ _EXTRACTORS = {
     "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string}),
     "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
     "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
-_TRANSFORMERS = {}
+_TRANSFORMERS = {
+    "sanitize": (DataSanitizer, [], {"strip_strings": _boolean, "mask_fields": _strings}),}
 _LOADERS = {}
 
 

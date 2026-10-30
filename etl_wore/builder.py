@@ -3,6 +3,7 @@ import codecs
 from copy import deepcopy
 from pathlib import Path
 import os
+import math
 from urllib.parse import urlparse
 
 from .extractors.csv_extractor import CsvExtractor
@@ -29,6 +30,10 @@ def _boolean(value):
 
 def _positive_int(value):
     return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def _positive_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value > 0
 
 
 def _strings(value):
@@ -79,7 +84,7 @@ def _schema_validator(schema, drop_invalid=False):
 
 # Entries are (constructor, required options, option validators). No dynamic imports.
 _EXTRACTORS = {
-    "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string, "max_pages": _positive_int}),
+    "rest": (RestApiExtractor, ['endpoint'], {"endpoint": _http_url, "headers": _headers, "page_param": _string, "max_pages": _positive_int, "timeout": _positive_number}),
     "json": (JsonExtractor, ['filepath'], {"filepath": _string, "is_lines": _boolean, "encoding": _encoding}),
     "csv": (CsvExtractor, ['filepath'], {"filepath": _string, "delimiter": _delimiter, "encoding": _encoding}),}
 _TRANSFORMERS = {

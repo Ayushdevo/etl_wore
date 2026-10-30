@@ -23,3 +23,18 @@ def test_empty_terminal_page_within_limit_succeeds():
 def test_request_limit_is_a_positive_integer(limit):
     with pytest.raises(ValueError):
         RestApiExtractor("https://example.test/items", max_pages=limit)
+
+
+
+def test_timeout_is_forwarded_to_each_request():
+    source = _component({"type": "rest", "endpoint": "https://example.test/items", "timeout": 0.25}, _EXTRACTORS, "source")
+    with patch("etl_wore.extractors.api_extractor.requests.get") as get:
+        get.return_value.json.return_value = []
+        assert list(source.extract()) == []
+        assert get.call_args.kwargs["timeout"] == 0.25
+
+
+@pytest.mark.parametrize("timeout", [0, -1, True, float("nan"), float("inf"), "10"])
+def test_invalid_timeout_is_rejected_before_network(timeout):
+    with pytest.raises(ValueError):
+        RestApiExtractor("https://example.test/items", timeout=timeout)

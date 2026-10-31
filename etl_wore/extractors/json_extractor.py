@@ -19,6 +19,15 @@ def _finite_float(value):
     return number
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f'Duplicate JSON object key: {key}')
+        result[key] = value
+    return result
+
+
 class JsonExtractor(BaseExtractor):
     def __init__(self, filepath: str, is_lines: bool = False, encoding: str = "utf-8-sig"):
         super().__init__(name=f"JsonExtractor({os.path.basename(filepath)})")
@@ -36,12 +45,12 @@ class JsonExtractor(BaseExtractor):
                     for line_no, line in enumerate(f, start=1):
                         line = line.strip()
                         if line:
-                            item = json.loads(line, parse_constant=_reject_constant, parse_float=_finite_float)
+                            item = json.loads(line, parse_constant=_reject_constant, parse_float=_finite_float, object_pairs_hook=_unique_object)
                             if not isinstance(item, dict):
                                 raise ExtractionError(f"JSON Lines record at line {line_no} must be an object")
                             yield item
                 else:
-                    data = json.load(f, parse_constant=_reject_constant, parse_float=_finite_float)
+                    data = json.load(f, parse_constant=_reject_constant, parse_float=_finite_float, object_pairs_hook=_unique_object)
                     if isinstance(data, list):
                         for index, item in enumerate(data):
                             if not isinstance(item, dict):

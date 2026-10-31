@@ -10,6 +10,11 @@ from ..exceptions import LoadingError
 from .base import BaseLoader
 
 
+def _identifier_key(value):
+    # SQLite identifiers fold ASCII letters only, not Unicode case variants.
+    return value.translate(str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))
+
+
 class SqliteLoader(BaseLoader):
     def __init__(self, db_path: str, table_name: str):
         super().__init__(name=f"SqliteLoader({table_name})")
@@ -49,10 +54,10 @@ class SqliteLoader(BaseLoader):
                 conn.execute("BEGIN")
                 conn.execute(create_sql)
                 existing_columns = {
-                    row[1].casefold() for row in conn.execute(f"PRAGMA table_info({table})")
+                    _identifier_key(row[1]) for row in conn.execute(f"PRAGMA table_info({table})")
                 }
                 for column in columns:
-                    if column.casefold() not in existing_columns:
+                    if _identifier_key(column) not in existing_columns:
                         conn.execute(f"ALTER TABLE {table} ADD COLUMN {quote(column)} TEXT")
                 rows = [
                     [None if r.get(c, "") is None else str(r.get(c, "")) for c in columns]

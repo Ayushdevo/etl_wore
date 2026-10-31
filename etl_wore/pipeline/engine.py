@@ -93,5 +93,5 @@ class Pipeline:
 
     def _flush_batch(self, batch: List, ctx: PipelineContext):
         for loader in self.loaders:
-            loader.load(batch)
+            loader.load(deepcopy(batch))
         ctx.records_loaded += len(batch)

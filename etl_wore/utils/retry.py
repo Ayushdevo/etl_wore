@@ -16,6 +16,10 @@ def retry(max_attempts: int = 3, initial_delay: float = 1.0, backoff_factor: flo
     if not math.isfinite(backoff_factor) or backoff_factor <= 0:
         raise ValueError("backoff_factor must be finite and positive")
 
+    filters = exceptions if isinstance(exceptions, tuple) else (exceptions,)
+    if any(not isinstance(kind, type) or not issubclass(kind, BaseException) for kind in filters):
+        raise ValueError('exceptions must be an exception class or a tuple of exception classes')
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

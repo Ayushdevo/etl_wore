@@ -2,6 +2,7 @@
 JSON and JSON Lines extractor.
 """
 import json
+import math
 import os
 from typing import Generator, Dict, Any
 from .base import BaseExtractor
@@ -9,6 +10,13 @@ from ..exceptions import ExtractionError
 
 def _reject_constant(value):
     raise ValueError(f"Invalid JSON numeric constant: {value}")
+
+
+def _finite_float(value):
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError(f'JSON numbers must be finite: {value}')
+    return number
 
 
 class JsonExtractor(BaseExtractor):
@@ -28,12 +36,12 @@ class JsonExtractor(BaseExtractor):
                     for line_no, line in enumerate(f, start=1):
                         line = line.strip()
                         if line:
-                            item = json.loads(line, parse_constant=_reject_constant)
+                            item = json.loads(line, parse_constant=_reject_constant, parse_float=_finite_float)
                             if not isinstance(item, dict):
                                 raise ExtractionError(f"JSON Lines record at line {line_no} must be an object")
                             yield item
                 else:
-                    data = json.load(f, parse_constant=_reject_constant)
+                    data = json.load(f, parse_constant=_reject_constant, parse_float=_finite_float)
                     if isinstance(data, list):
                         for index, item in enumerate(data):
                             if not isinstance(item, dict):

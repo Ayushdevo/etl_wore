@@ -43,6 +43,9 @@ class JsonLinesLoader(BaseLoader):
             for record in records:
                 _validate_keys(record)
             lines = [json.dumps(record, ensure_ascii=False, allow_nan=False) + "\n" for record in records]
+            # Check the complete batch before opening the destination for append.
+            for line in lines:
+                line.encode('utf-8')
             needs_separator = False
             if os.path.exists(self.output_path) and os.path.getsize(self.output_path):
                 with open(self.output_path, "rb") as existing:

@@ -3,6 +3,7 @@ Core Pipeline execution engine.
 """
 
 import sys
+from copy import deepcopy
 from typing import List
 
 from ..extractors.base import BaseExtractor
@@ -47,7 +48,7 @@ class Pipeline:
                 try:
                     for record in iterator:
                         ctx.records_extracted += 1
-                        curr = record
+                        curr = deepcopy(record)
                         for transformer in self.transformers:
                             curr = transformer.transform(curr)
                             if curr is None:

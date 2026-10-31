@@ -7,6 +7,26 @@ from typing import List, Dict, Any
 from .base import BaseLoader
 from ..exceptions import LoadingError
 
+def _validate_keys(value, active=None):
+    if not isinstance(value, (dict, list, tuple)):
+        return
+    active = set() if active is None else active
+    if id(value) in active:
+        raise ValueError('Circular JSON container')
+    active.add(id(value))
+    try:
+        if isinstance(value, dict):
+            if any(not isinstance(key, str) for key in value):
+                raise ValueError('JSON object keys must be strings')
+            children = value.values()
+        else:
+            children = value
+        for child in children:
+            _validate_keys(child, active)
+    finally:
+        active.remove(id(value))
+
+
 class JsonLinesLoader(BaseLoader):
     def __init__(self, output_path: str):
         super().__init__(name=f"JsonLinesLoader({os.path.basename(output_path)})")
@@ -20,6 +40,8 @@ class JsonLinesLoader(BaseLoader):
             os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
             if any(not isinstance(record, dict) for record in records):
                 raise ValueError("JSONL records must be objects")
+            for record in records:
+                _validate_keys(record)
             lines = [json.dumps(record, ensure_ascii=False, allow_nan=False) + "\n" for record in records]
             needs_separator = False
             if os.path.exists(self.output_path) and os.path.getsize(self.output_path):

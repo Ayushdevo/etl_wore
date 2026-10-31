@@ -1,6 +1,7 @@
 """
 Schema validation and field type casting.
 """
+import math
 from typing import Dict, Any, Optional, Type
 from .base import BaseTransformer
 from ..exceptions import TransformationError
@@ -33,5 +34,9 @@ class SchemaValidator(BaseTransformer):
                     if self.drop_invalid:
                         return None
                     raise TransformationError(f"Field '{field}' could not be cast to {expected_type}: {e}")
+            if expected_type is float and not math.isfinite(transformed[field]):
+                if self.drop_invalid:
+                    return None
+                raise TransformationError(f"Field '{field}' must be finite")
         return transformed
 

@@ -4,6 +4,7 @@ SQLite destination loader with dynamic table creation.
 
 import os
 import sqlite3
+from threading import RLock
 from typing import Any, Dict, List
 
 from ..exceptions import LoadingError
@@ -21,14 +22,20 @@ class SqliteLoader(BaseLoader):
         self.db_path = db_path
         self.table_name = table_name
         self._conn = None
+        self._lock = RLock()
 
     def _get_connection(self):
         if self._conn is None:
             os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
-            self._conn = sqlite3.connect(self.db_path)
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
         return self._conn
 
     def load(self, records: List[Dict[str, Any]]):
+        # A shared connection needs serialization across worker loads and close.
+        with self._lock:
+            return self._load_locked(records)
+
+    def _load_locked(self, records):
         if not records:
             return
 
@@ -68,6 +75,7 @@ class SqliteLoader(BaseLoader):
             raise LoadingError(f"Failed to insert into SQLite table {self.table_name}: {e}") from e
 
     def close(self):
-        if self._conn:
-            self._conn.close()
-            self._conn = None
+        with self._lock:
+            if self._conn:
+                self._conn.close()
+                self._conn = None

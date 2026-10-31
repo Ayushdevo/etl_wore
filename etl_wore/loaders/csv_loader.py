@@ -2,6 +2,7 @@
 CSV destination loader.
 """
 import csv
+import io
 import os
 from typing import List, Dict, Any
 from .base import BaseLoader
@@ -38,13 +39,18 @@ class CsvLoader(BaseLoader):
                 with open(self.output_path, "rb") as existing:
                     existing.seek(-1, os.SEEK_END)
                     needs_separator = existing.read(1) not in (b"\n", b"\r")
+            # Serialize and encode the full batch before opening the destination.
+            buffer = io.StringIO(newline='')
+            writer = csv.DictWriter(buffer, fieldnames=headers, delimiter=self.delimiter)
+            if write_header:
+                writer.writeheader()
+            writer.writerows(records)
+            text = buffer.getvalue()
+            text.encode('utf-8')
             with open(self.output_path, mode=mode, newline="", encoding="utf-8") as f:
                 if needs_separator:
                     f.write("\n")
-                writer = csv.DictWriter(f, fieldnames=headers, delimiter=self.delimiter)
-                if write_header:
-                    writer.writeheader()
-                writer.writerows(records)
+                f.write(text)
 
             self._initialized = True
         except Exception as e:

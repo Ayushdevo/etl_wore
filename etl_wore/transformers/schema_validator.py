@@ -29,6 +29,8 @@ class SchemaValidator(BaseTransformer):
                             raise ValueError("Expected true, false, 1, or 0")
                         transformed[field] = normalized in {"true", "1"}
                     else:
+                        if expected_type is int and isinstance(val, float) and math.isfinite(val) and not val.is_integer():
+                            raise ValueError('Cannot cast a fractional value to int without data loss')
                         transformed[field] = expected_type(val)
                 except (ValueError, TypeError, OverflowError) as e:
                     if self.drop_invalid:

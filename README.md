@@ -162,3 +162,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `parse_json` | `fields` (required) | Parse embedded JSON while rejecting duplicate keys and nonfinite numbers. |
 | `encode_json` | `fields` (required), `sort_keys` | Encode values as compact UTF-8 JSON; reject nonfinite numbers and nonstring object keys. |
 | `flatten` | `separator` | Flatten nested objects to separated paths, preserving arrays and empty objects; reject ambiguous keys. |
+| `unflatten` | `separator` | Rebuild nested objects from separated paths; reject prefix collisions in either input order. |

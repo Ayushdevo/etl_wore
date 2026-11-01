@@ -37,6 +37,7 @@ from .transformers.clamp_numbers import ClampNumbers
 from .transformers.parse_json import ParseJsonFields
 from .transformers.encode_json import EncodeJsonFields
 from .transformers.flatten import FlattenRecord
+from .transformers.unflatten import UnflattenRecord
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -143,6 +144,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'unflatten': (UnflattenRecord, [], {'separator': lambda value: True}),
     'flatten': (FlattenRecord, [], {'separator': lambda value: True}),
     'encode_json': (EncodeJsonFields, ['fields'], {'fields': lambda value: True, 'sort_keys': lambda value: True}),
     'parse_json': (ParseJsonFields, ['fields'], {'fields': lambda value: True}),

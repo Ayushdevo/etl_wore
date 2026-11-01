@@ -44,6 +44,10 @@ def main(argv=None):
         if args.batch_size is not None:
             spec["batch_size"] = args.batch_size
         pipeline = build_pipeline(spec, base_dir=Path(args.spec).resolve().parent)
+        for sink in pipeline.loaders:
+            destination = getattr(sink, "output_path", getattr(sink, "db_path", None))
+            if destination is not None and _same_path(destination, args.spec):
+                raise ConfigurationError("Output destination must not overwrite the specification")
         if args.metrics_path:
             protected = [
                 getattr(component, name)

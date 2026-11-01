@@ -13,7 +13,7 @@ from .extractors.csv_extractor import CsvExtractor
 from .extractors.json_extractor import JsonExtractor
 from .loaders.csv_loader import CsvLoader
 from .loaders.json_loader import JsonLinesLoader
-from .loaders.sqlite_loader import SqliteLoader
+from .loaders.sqlite_loader import SqliteLoader, _identifier_key
 from .pipeline.engine import Pipeline
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
@@ -226,7 +226,7 @@ def _validate_destinations(pipeline):
                 distinct_tables = (
                     isinstance(sink, SqliteLoader)
                     and isinstance(previous, SqliteLoader)
-                    and sink.table_name.casefold() != previous.table_name.casefold()
+                    and _identifier_key(sink.table_name) != _identifier_key(previous.table_name)
                 )
                 if not distinct_tables:
                     raise ConfigurationError("Output destinations must be distinct")

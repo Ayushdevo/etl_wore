@@ -61,7 +61,7 @@ class Pipeline:
                                 raise TransformationError("Transformers must return an object or None")
                         if curr is not None:
                             ctx.records_transformed += 1
-                            batch.append(curr)
+                            batch.append(deepcopy(curr))
 
                         if len(batch) >= self.batch_size:
                             self._flush_batch(batch, ctx)

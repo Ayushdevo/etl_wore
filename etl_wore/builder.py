@@ -38,6 +38,7 @@ from .transformers.parse_json import ParseJsonFields
 from .transformers.encode_json import EncodeJsonFields
 from .transformers.flatten import FlattenRecord
 from .transformers.unflatten import UnflattenRecord
+from .transformers.hash_fields import HashFields
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -144,6 +145,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'hash_fields': (HashFields, ['fields', 'target'], {'fields': lambda value: True, 'target': lambda value: True, 'algorithm': lambda value: True}),
     'unflatten': (UnflattenRecord, [], {'separator': lambda value: True}),
     'flatten': (FlattenRecord, [], {'separator': lambda value: True}),
     'encode_json': (EncodeJsonFields, ['fields'], {'fields': lambda value: True, 'sort_keys': lambda value: True}),

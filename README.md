@@ -148,3 +148,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `constants` | `values` (required), `overwrite` | Attach constant fields such as source provenance, with optional overwrite protection. |
 | `coalesce` | `fields` (required), `target` (required), `skip_empty` | Choose the first present non-null input field, preserving zero and false. |
 | `require_fields` | `fields` (required), `drop_invalid`, `allow_null` | Require selected fields with explicit null and drop policies. |
+| `filter_value` | `field` (required), `value` (required), `exclude` | Keep or exclude records matching one field value; distinguish missing, null, and booleans. |

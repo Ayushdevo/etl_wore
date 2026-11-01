@@ -25,7 +25,7 @@ class CsvLoader(BaseLoader):
             has_content = os.path.exists(self.output_path) and os.path.getsize(self.output_path) > 0
             if has_content:
                 with open(self.output_path, newline="", encoding="utf-8-sig") as existing:
-                    headers = next(csv.reader(existing, delimiter=self.delimiter))
+                    headers = next(csv.reader(existing, delimiter=self.delimiter, strict=True))
             if not headers or any(not isinstance(name, str) or not name for name in headers) or len(set(headers)) != len(headers):
                 raise ValueError("CSV column names must be nonempty, unique strings")
             # Validate the whole batch before appending any rows.

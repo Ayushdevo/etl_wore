@@ -15,6 +15,7 @@ from .loaders.csv_loader import CsvLoader
 from .loaders.json_loader import JsonLinesLoader
 from .loaders.sqlite_loader import SqliteLoader, _identifier_key
 from .pipeline.engine import Pipeline
+from .transformers.select_fields import SelectFields
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -121,6 +122,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'select_fields': (SelectFields, ['fields'], {'fields': lambda value: True, 'require_all': lambda value: True}),
     "dates": (
         DateNormalizer,
         ["date_fields"],

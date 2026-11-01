@@ -133,3 +133,11 @@ pytest -v
 ## License
 
 Released under the [MIT License](LICENSE).
+
+## Additional record transformations
+
+These optional built-ins work in Python and JSON/YAML specifications. Each transform returns a copy; field operations preserve missing/null fields unless stated otherwise. Invalid configuration fails during dry run. Invalid non-null data raises `TransformationError`.
+
+| Type | Options (required first) | Behavior |
+| --- | --- | --- |
+| `select_fields` | `fields` (required), `require_all` | Project ordered fields; optionally require every selected field. |

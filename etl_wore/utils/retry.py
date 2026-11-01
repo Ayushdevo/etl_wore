@@ -12,6 +12,13 @@ logger = setup_logger("etl_wore.utils.retry")
 def retry(max_attempts: int = 3, initial_delay: float = 1.0, backoff_factor: float = 2.0, exceptions=(Exception,)):
     if isinstance(max_attempts, bool) or not isinstance(max_attempts, int) or max_attempts < 1:
         raise ValueError("max_attempts must be a positive integer")
+    for name, value in (("initial_delay", initial_delay), ("backoff_factor", backoff_factor)):
+        try:
+            valid = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+        except OverflowError:
+            valid = False
+        if not valid:
+            raise ValueError(f"{name} must be a finite number")
     if not math.isfinite(initial_delay) or initial_delay < 0:
         raise ValueError("initial_delay must be finite and nonnegative")
     if not math.isfinite(backoff_factor) or backoff_factor <= 0:

@@ -24,6 +24,7 @@ from .transformers.constants import ConstantFields
 from .transformers.coalesce import CoalesceFields
 from .transformers.require_fields import RequireFields
 from .transformers.filter_value import FilterValue
+from .transformers.map_values import MapValues
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -130,6 +131,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'map_values': (MapValues, ['field', 'mapping'], {'field': lambda value: True, 'mapping': lambda value: True, 'strict': lambda value: True}),
     'filter_value': (FilterValue, ['field', 'value'], {'field': lambda value: True, 'value': lambda value: True, 'exclude': lambda value: True}),
     'require_fields': (RequireFields, ['fields'], {'fields': lambda value: True, 'drop_invalid': lambda value: True, 'allow_null': lambda value: True}),
     'coalesce': (CoalesceFields, ['fields', 'target'], {'fields': lambda value: True, 'target': lambda value: True, 'skip_empty': lambda value: True}),

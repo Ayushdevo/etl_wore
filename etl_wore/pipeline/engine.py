@@ -27,14 +27,20 @@ class Pipeline:
         self.loaders: List[BaseLoader] = []
 
     def add_extractor(self, extractor: BaseExtractor) -> "Pipeline":
+        if any(item is extractor for item in self.extractors):
+            raise ValueError("Component instance is already registered")
         self.extractors.append(extractor)
         return self
 
     def add_transformer(self, transformer: BaseTransformer) -> "Pipeline":
+        if any(item is transformer for item in self.transformers):
+            raise ValueError("Component instance is already registered")
         self.transformers.append(transformer)
         return self
 
     def add_loader(self, loader: BaseLoader) -> "Pipeline":
+        if any(item is loader for item in self.loaders):
+            raise ValueError("Component instance is already registered")
         self.loaders.append(loader)
         return self
 

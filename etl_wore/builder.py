@@ -34,6 +34,7 @@ from .transformers.truncate_text import TruncateText
 from .transformers.scale_numbers import ScaleNumbers
 from .transformers.round_numbers import RoundNumbers
 from .transformers.clamp_numbers import ClampNumbers
+from .transformers.parse_json import ParseJsonFields
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -140,6 +141,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'parse_json': (ParseJsonFields, ['fields'], {'fields': lambda value: True}),
     'clamp_numbers': (ClampNumbers, ['fields'], {'fields': lambda value: True, 'minimum': lambda value: True, 'maximum': lambda value: True}),
     'round_numbers': (RoundNumbers, ['fields'], {'fields': lambda value: True, 'digits': lambda value: True}),
     'scale_numbers': (ScaleNumbers, ['fields'], {'fields': lambda value: True, 'factor': lambda value: True, 'offset': lambda value: True}),

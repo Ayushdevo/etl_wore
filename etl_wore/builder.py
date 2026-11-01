@@ -33,6 +33,7 @@ from .transformers.join_text import JoinText
 from .transformers.truncate_text import TruncateText
 from .transformers.scale_numbers import ScaleNumbers
 from .transformers.round_numbers import RoundNumbers
+from .transformers.clamp_numbers import ClampNumbers
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -139,6 +140,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'clamp_numbers': (ClampNumbers, ['fields'], {'fields': lambda value: True, 'minimum': lambda value: True, 'maximum': lambda value: True}),
     'round_numbers': (RoundNumbers, ['fields'], {'fields': lambda value: True, 'digits': lambda value: True}),
     'scale_numbers': (ScaleNumbers, ['fields'], {'fields': lambda value: True, 'factor': lambda value: True, 'offset': lambda value: True}),
     'truncate_text': (TruncateText, ['fields', 'max_length'], {'fields': lambda value: True, 'max_length': lambda value: True}),

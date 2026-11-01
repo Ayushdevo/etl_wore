@@ -67,7 +67,7 @@ class SqliteLoader(BaseLoader):
                     if _identifier_key(column) not in existing_columns:
                         conn.execute(f"ALTER TABLE {table} ADD COLUMN {quote(column)} TEXT")
                 rows = [
-                    [None if r.get(c, "") is None else str(r.get(c, "")) for c in columns]
+                    [None if r.get(c) is None else str(r[c]) for c in columns]
                     for r in records
                 ]
                 conn.executemany(insert_sql, rows)

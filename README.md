@@ -156,3 +156,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `split_text` | `fields` (required), `separator` (required), `maxsplit` | Split string fields on a literal separator, preserving empty components. |
 | `join_text` | `fields` (required), `separator` | Join arrays of strings without silently coercing numbers or scalar strings. |
 | `truncate_text` | `fields` (required), `max_length` (required) | Limit string length by Unicode code points; permit zero-length output. |
+| `scale_numbers` | `fields` (required), `factor`, `offset` | Apply a finite factor and offset, rejecting nonnumeric inputs and overflow. |

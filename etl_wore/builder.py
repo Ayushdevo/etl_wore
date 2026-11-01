@@ -31,6 +31,7 @@ from .transformers.regex_replace import RegexReplace
 from .transformers.split_text import SplitText
 from .transformers.join_text import JoinText
 from .transformers.truncate_text import TruncateText
+from .transformers.scale_numbers import ScaleNumbers
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -137,6 +138,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'scale_numbers': (ScaleNumbers, ['fields'], {'fields': lambda value: True, 'factor': lambda value: True, 'offset': lambda value: True}),
     'truncate_text': (TruncateText, ['fields', 'max_length'], {'fields': lambda value: True, 'max_length': lambda value: True}),
     'join_text': (JoinText, ['fields'], {'fields': lambda value: True, 'separator': lambda value: True}),
     'split_text': (SplitText, ['fields', 'separator'], {'fields': lambda value: True, 'separator': lambda value: True, 'maxsplit': lambda value: True}),

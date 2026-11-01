@@ -9,6 +9,8 @@ from ..loaders.base import BaseLoader
 class ParallelBatchLoader(BaseLoader):
     def __init__(self, base_loader: BaseLoader, max_workers: int = 4):
         super().__init__(name=f"Parallel({base_loader.name})")
+        if isinstance(max_workers, bool) or not isinstance(max_workers, int) or max_workers < 1:
+            raise ValueError("max_workers must be a positive integer")
         self.base_loader = base_loader
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.futures = []

@@ -30,6 +30,20 @@ def _reject_constant(text):
     raise ConfigurationError(f"Invalid JSON constant in specification: {text}")
 
 
+def _check_alias_cycles(value, active=None):
+    if not isinstance(value, (dict, list)):
+        return
+    active = set() if active is None else active
+    if id(value) in active:
+        raise ConfigurationError("Recursive YAML aliases are not supported")
+    active.add(id(value))
+    try:
+        for item in (value.values() if isinstance(value, dict) else value):
+            _check_alias_cycles(item, active)
+    finally:
+        active.remove(id(value))
+
+
 class SpecParser:
     @staticmethod
     def parse_file(filepath: str) -> Dict[str, Any]:
@@ -77,4 +91,5 @@ class SpecParser:
             raise ConfigurationError(f"Unable to read specification {filepath}: {exc}") from exc
         if not isinstance(spec, dict):
             raise ConfigurationError("Pipeline specification must be a mapping")
+        _check_alias_cycles(spec)
         return spec

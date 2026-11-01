@@ -150,3 +150,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `require_fields` | `fields` (required), `drop_invalid`, `allow_null` | Require selected fields with explicit null and drop policies. |
 | `filter_value` | `field` (required), `value` (required), `exclude` | Keep or exclude records matching one field value; distinguish missing, null, and booleans. |
 | `map_values` | `field` (required), `mapping` (required), `strict` | Map string categories to copied values; optionally reject unmapped values. |
+| `string_case` | `fields` (required), `mode` | Normalize string case using lower, upper, Unicode casefold, or title. |

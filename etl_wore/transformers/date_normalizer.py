@@ -9,7 +9,11 @@ from .base import BaseTransformer
 class DateNormalizer(BaseTransformer):
     def __init__(self, date_fields: List[str], output_format: str = "%Y-%m-%dT%H:%M:%SZ"):
         super().__init__()
-        self.date_fields = date_fields
+        if not isinstance(date_fields, (list, tuple)) or not date_fields or any(not isinstance(field, str) or not field for field in date_fields):
+            raise ValueError("date_fields must be a nonempty sequence of field names")
+        if not isinstance(output_format, str) or not output_format:
+            raise ValueError("output_format must be a nonempty string")
+        self.date_fields = tuple(date_fields)
         self.output_format = output_format
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:

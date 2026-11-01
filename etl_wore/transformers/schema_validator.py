@@ -38,7 +38,10 @@ class SchemaValidator(BaseTransformer):
                     else:
                         if expected_type is int and isinstance(val, float) and math.isfinite(val) and not val.is_integer():
                             raise ValueError('Cannot cast a fractional value to int without data loss')
-                        transformed[field] = expected_type(val)
+                        converted = expected_type(val)
+                        if expected_type is int and not isinstance(val, (str, bytes, bytearray, bool)) and converted != val:
+                            raise ValueError("Cannot cast a fractional value to int without data loss")
+                        transformed[field] = converted
                 except (ValueError, TypeError, OverflowError) as e:
                     if self.drop_invalid:
                         return None

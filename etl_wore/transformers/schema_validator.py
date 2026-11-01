@@ -9,7 +9,14 @@ from ..exceptions import TransformationError
 class SchemaValidator(BaseTransformer):
     def __init__(self, schema: Dict[str, Type], drop_invalid: bool = False):
         super().__init__()
-        self.schema = schema
+        if not isinstance(schema, dict) or any(
+            not isinstance(key, str) or not key or kind not in (str, int, float, bool)
+            for key, kind in schema.items()
+        ):
+            raise ValueError("schema must map nonempty field names to str, int, float or bool")
+        if not isinstance(drop_invalid, bool):
+            raise ValueError("drop_invalid must be a boolean")
+        self.schema = dict(schema)
         self.drop_invalid = drop_invalid
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:

@@ -26,6 +26,7 @@ from .transformers.require_fields import RequireFields
 from .transformers.filter_value import FilterValue
 from .transformers.map_values import MapValues
 from .transformers.string_case import StringCase
+from .transformers.replace_text import ReplaceText
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -132,6 +133,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'replace_text': (ReplaceText, ['fields', 'old', 'new'], {'fields': lambda value: True, 'old': lambda value: True, 'new': lambda value: True, 'count': lambda value: True}),
     'string_case': (StringCase, ['fields'], {'fields': lambda value: True, 'mode': lambda value: True}),
     'map_values': (MapValues, ['field', 'mapping'], {'field': lambda value: True, 'mapping': lambda value: True, 'strict': lambda value: True}),
     'filter_value': (FilterValue, ['field', 'value'], {'field': lambda value: True, 'value': lambda value: True, 'exclude': lambda value: True}),

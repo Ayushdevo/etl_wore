@@ -45,7 +45,10 @@ class JsonExtractor(BaseExtractor):
                     for line_no, line in enumerate(f, start=1):
                         line = line.strip()
                         if line:
-                            item = json.loads(line, parse_constant=_reject_constant, parse_float=_finite_float, object_pairs_hook=_unique_object)
+                            try:
+                                item = json.loads(line, parse_constant=_reject_constant, parse_float=_finite_float, object_pairs_hook=_unique_object)
+                            except ValueError as exc:
+                                raise ExtractionError(f"Invalid JSON Lines record at line {line_no}: {exc}") from exc
                             if not isinstance(item, dict):
                                 raise ExtractionError(f"JSON Lines record at line {line_no} must be an object")
                             yield item

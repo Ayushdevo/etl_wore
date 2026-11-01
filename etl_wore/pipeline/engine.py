@@ -6,6 +6,7 @@ import sys
 from copy import deepcopy
 from typing import List
 
+from ..exceptions import ExtractionError, TransformationError
 from ..extractors.base import BaseExtractor
 from ..loaders.base import BaseLoader
 from ..logger import setup_logger
@@ -48,6 +49,8 @@ class Pipeline:
                 try:
                     for record in iterator:
                         ctx.records_extracted += 1
+                        if not isinstance(record, dict):
+                            raise ExtractionError("Extractor records must be objects")
                         curr = deepcopy(record)
                         for transformer in self.transformers:
                             curr = transformer.transform(curr)

@@ -20,6 +20,7 @@ from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
 from .transformers.copy_fields import CopyFields
 from .transformers.defaults import DefaultFields
+from .transformers.constants import ConstantFields
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -126,6 +127,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'constants': (ConstantFields, ['values'], {'values': lambda value: True, 'overwrite': lambda value: True}),
     'defaults': (DefaultFields, ['values'], {'values': lambda value: True, 'replace_null': lambda value: True}),
     'copy_fields': (CopyFields, ['mapping'], {'mapping': lambda value: True, 'overwrite': lambda value: True}),
     'rename_fields': (RenameFields, ['mapping'], {'mapping': lambda value: True}),

@@ -145,3 +145,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `rename_fields` | `mapping` (required) | Rename fields simultaneously, support swaps, and reject overwrites. |
 | `copy_fields` | `mapping` (required), `overwrite` | Copy original field values to new destinations; reject overwrites by default. |
 | `defaults` | `values` (required), `replace_null` | Fill absent fields with independent default values; optionally replace nulls. |
+| `constants` | `values` (required), `overwrite` | Attach constant fields such as source provenance, with optional overwrite protection. |

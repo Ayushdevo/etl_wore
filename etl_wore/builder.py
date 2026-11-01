@@ -21,6 +21,7 @@ from .transformers.rename_fields import RenameFields
 from .transformers.copy_fields import CopyFields
 from .transformers.defaults import DefaultFields
 from .transformers.constants import ConstantFields
+from .transformers.coalesce import CoalesceFields
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -127,6 +128,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'coalesce': (CoalesceFields, ['fields', 'target'], {'fields': lambda value: True, 'target': lambda value: True, 'skip_empty': lambda value: True}),
     'constants': (ConstantFields, ['values'], {'values': lambda value: True, 'overwrite': lambda value: True}),
     'defaults': (DefaultFields, ['values'], {'values': lambda value: True, 'replace_null': lambda value: True}),
     'copy_fields': (CopyFields, ['mapping'], {'mapping': lambda value: True, 'overwrite': lambda value: True}),

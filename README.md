@@ -146,3 +146,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `copy_fields` | `mapping` (required), `overwrite` | Copy original field values to new destinations; reject overwrites by default. |
 | `defaults` | `values` (required), `replace_null` | Fill absent fields with independent default values; optionally replace nulls. |
 | `constants` | `values` (required), `overwrite` | Attach constant fields such as source provenance, with optional overwrite protection. |
+| `coalesce` | `fields` (required), `target` (required), `skip_empty` | Choose the first present non-null input field, preserving zero and false. |

@@ -3,6 +3,7 @@ Retry decorator with exponential backoff.
 """
 import math
 import time
+from threading import TIMEOUT_MAX
 import functools
 from ..logger import setup_logger
 
@@ -23,7 +24,7 @@ def retry(max_attempts: int = 3, initial_delay: float = 1.0, backoff_factor: flo
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            delay = initial_delay
+            delay = min(initial_delay, TIMEOUT_MAX)
             attempt = 1
             while attempt <= max_attempts:
                 try:
@@ -34,7 +35,7 @@ def retry(max_attempts: int = 3, initial_delay: float = 1.0, backoff_factor: flo
                         raise
                     logger.warning(f"Attempt {attempt} failed for {func.__name__}: {e}. Retrying in {delay:.1f}s...")
                     time.sleep(delay)
-                    delay *= backoff_factor
+                    delay = min(delay * backoff_factor, TIMEOUT_MAX)
                     attempt += 1
         return wrapper
     return decorator

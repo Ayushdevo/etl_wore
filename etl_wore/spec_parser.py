@@ -32,6 +32,10 @@ def _reject_constant(text):
 
 def _check_alias_cycles(value, active=None):
     if not isinstance(value, (dict, list)):
+        if value is not None and not isinstance(value, (str, int, float, bool)):
+            raise ConfigurationError("Specifications require JSON-compatible scalar values")
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ConfigurationError("Specification numbers must be finite")
         return
     active = set() if active is None else active
     if id(value) in active:

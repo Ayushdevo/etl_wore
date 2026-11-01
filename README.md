@@ -152,3 +152,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `map_values` | `field` (required), `mapping` (required), `strict` | Map string categories to copied values; optionally reject unmapped values. |
 | `string_case` | `fields` (required), `mode` | Normalize string case using lower, upper, Unicode casefold, or title. |
 | `replace_text` | `fields` (required), `old` (required), `new` (required), `count` | Replace literal text with an optional nonnegative replacement limit. |
+| `regex_replace` | `fields` (required), `pattern` (required), `replacement` (required), `count` | Replace regular-expression matches; validate patterns and backreferences during dry run. |

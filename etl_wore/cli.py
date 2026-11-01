@@ -34,7 +34,10 @@ def main(argv=None):
     parser.add_argument("--metrics-path", help="Write successful-run metrics as JSON")
 
     args = parser.parse_args(argv)
-    logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
+    level = logging.DEBUG if args.verbose else logging.INFO
+    logger.setLevel(level)
+    for name in ("etl_wore.pipeline.engine", "etl_wore.utils.retry"):
+        logging.getLogger(name).setLevel(level)
     if not args.spec:
         parser.print_help()
         sys.exit(1)

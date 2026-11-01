@@ -57,6 +57,8 @@ class Pipeline:
                             if curr is None:
                                 ctx.records_dropped += 1
                                 break
+                            if not isinstance(curr, dict):
+                                raise TransformationError("Transformers must return an object or None")
                         if curr is not None:
                             ctx.records_transformed += 1
                             batch.append(curr)

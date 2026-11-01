@@ -17,6 +17,7 @@ from .loaders.sqlite_loader import SqliteLoader, _identifier_key
 from .pipeline.engine import Pipeline
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
+from .transformers.rename_fields import RenameFields
 from .transformers.date_normalizer import DateNormalizer
 from .transformers.deduplicator import DeduplicationTransformer
 from .transformers.sanitizer import DataSanitizer
@@ -123,6 +124,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'rename_fields': (RenameFields, ['mapping'], {'mapping': lambda value: True}),
     'drop_fields': (DropFields, ['fields'], {'fields': lambda value: True}),
     'select_fields': (SelectFields, ['fields'], {'fields': lambda value: True, 'require_all': lambda value: True}),
     "dates": (

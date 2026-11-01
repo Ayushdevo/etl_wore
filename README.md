@@ -141,3 +141,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | Type | Options (required first) | Behavior |
 | --- | --- | --- |
 | `select_fields` | `fields` (required), `require_all` | Project ordered fields; optionally require every selected field. |
+| `drop_fields` | `fields` (required) | Remove selected fields, ignoring absent names. |

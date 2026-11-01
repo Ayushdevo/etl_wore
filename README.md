@@ -160,3 +160,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `round_numbers` | `fields` (required), `digits` | Round finite numbers using Python ties-to-even semantics and integer precision. |
 | `clamp_numbers` | `fields` (required), `minimum`, `maximum` | Clip finite numbers to one or two validated bounds. |
 | `parse_json` | `fields` (required) | Parse embedded JSON while rejecting duplicate keys and nonfinite numbers. |
+| `encode_json` | `fields` (required), `sort_keys` | Encode values as compact UTF-8 JSON; reject nonfinite numbers and nonstring object keys. |

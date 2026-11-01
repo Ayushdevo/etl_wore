@@ -12,6 +12,10 @@ from ..utils.retry import retry
 from .base import BaseExtractor
 
 
+class _TransientHttpError(requests.HTTPError):
+    """A throttling or server response that may succeed when retried."""
+
+
 class RestApiExtractor(BaseExtractor):
     def __init__(
         self,
@@ -39,14 +43,19 @@ class RestApiExtractor(BaseExtractor):
         if not math.isfinite(self.timeout) or self.timeout <= 0:
             raise ValueError("timeout must be a finite positive number")
 
-    @retry(max_attempts=3, initial_delay=1.0)
+    @retry(max_attempts=3, initial_delay=1.0, exceptions=(requests.ConnectionError, requests.Timeout, _TransientHttpError))
     def _fetch_page(self, page: int) -> Dict[str, Any]:
         params = {self.page_param: page}
         response = requests.get(
             self.endpoint, headers=self.headers, params=params, timeout=self.timeout
         )
         try:
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.HTTPError as exc:
+                if response.status_code == 429 or 500 <= response.status_code <= 599:
+                    raise _TransientHttpError(str(exc), response=response) from exc
+                raise
             return response.json()
         finally:
             response.close()

@@ -45,8 +45,11 @@ class RestApiExtractor(BaseExtractor):
         response = requests.get(
             self.endpoint, headers=self.headers, params=params, timeout=self.timeout
         )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response.raise_for_status()
+            return response.json()
+        finally:
+            response.close()
 
     def extract(self) -> Generator[Dict[str, Any], None, None]:
         page = 1

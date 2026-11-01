@@ -3,6 +3,7 @@ REST API extractor with pagination support.
 """
 
 import math
+from urllib.parse import urlparse
 from typing import Any, Dict, Generator, Optional
 
 import requests
@@ -26,8 +27,19 @@ class RestApiExtractor(BaseExtractor):
         timeout: float = 10,
     ):
         super().__init__(name=f"RestApiExtractor({endpoint})")
+        try:
+            parts = urlparse(endpoint) if isinstance(endpoint, str) else None
+            valid_url = parts is not None and parts.scheme in {"http", "https"} and bool(parts.hostname)
+        except ValueError:
+            valid_url = False
+        if not valid_url:
+            raise ValueError("endpoint must be an HTTP(S) URL with a hostname")
+        if not isinstance(page_param, str) or not page_param.strip():
+            raise ValueError("page_param must be a nonempty string")
+        if headers is not None and (not isinstance(headers, dict) or any(not isinstance(key, str) or not key.strip() or not isinstance(value, str) for key, value in headers.items())):
+            raise ValueError("headers must map nonempty strings to strings")
         self.endpoint = endpoint
-        self.headers = headers or {}
+        self.headers = dict(headers) if headers is not None else {}
         self.page_param = page_param
         if max_pages is not None and (
             isinstance(max_pages, bool) or not isinstance(max_pages, int) or max_pages < 1

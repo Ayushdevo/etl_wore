@@ -179,3 +179,20 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `value_lengths` | `fields` (required) | Replace text, array or object fields with their lengths; text length counts Unicode code points. |
 | `regex_extract` | `fields` (required), `pattern` (required), `group` | Extract the first regular-expression match or chosen group; unmatched fields become null. |
 | `parse_booleans` | `fields` (required) | Parse true/false and 1/0 text or integer flags explicitly; preserve existing booleans. |
+
+### Run the cleaning example
+
+```bash
+python -m etl_wore --spec examples/clean_records.json --dry-run
+python -m etl_wore --spec examples/clean_records.json --summary json
+```
+
+The example composes the text, encoding, array and flag operations above and
+appends one cleaned record to `output/clean_records.jsonl`. Input and output
+paths resolve relative to the specification. URL operations act on components,
+not complete URLs; literal plus signs remain plus signs when decoding. Base64
+decoding requires canonical standard padding and UTF-8 text. Unicode
+normalization defaults to NFC; compatibility normalization requires an explicit
+NFKC or NFKD option. Array operations accept lists; nested nulls are preserved
+by `compact_arrays`, and `unique_arrays` compares canonical JSON values.
+HTML entity decoding does not make markup safe to render.

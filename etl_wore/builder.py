@@ -24,6 +24,7 @@ from .transformers.url_decode import UrlDecode
 from .transformers.base64_encode import Base64Encode
 from .transformers.base64_decode import Base64Decode
 from .transformers.compact_arrays import CompactArrays
+from .transformers.unique_arrays import UniqueArrays
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -154,6 +155,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'unique_arrays': (UniqueArrays, ['fields'], {'fields': _strings}),
     'compact_arrays': (CompactArrays, ['fields'], {'fields': _strings}),
     'base64_decode': (Base64Decode, ['fields'], {'fields': _strings}),
     'base64_encode': (Base64Encode, ['fields'], {'fields': _strings}),

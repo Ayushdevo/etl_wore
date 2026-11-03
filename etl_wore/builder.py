@@ -26,6 +26,7 @@ from .transformers.base64_decode import Base64Decode
 from .transformers.compact_arrays import CompactArrays
 from .transformers.unique_arrays import UniqueArrays
 from .transformers.sort_arrays import SortArrays
+from .transformers.slice_arrays import SliceArrays
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -156,6 +157,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'slice_arrays': (SliceArrays, ['fields'], {'fields': _strings, 'start': lambda value: True, 'stop': lambda value: True, 'step': lambda value: True}),
     'sort_arrays': (SortArrays, ['fields'], {'fields': _strings, 'descending': lambda value: True}),
     'unique_arrays': (UniqueArrays, ['fields'], {'fields': _strings}),
     'compact_arrays': (CompactArrays, ['fields'], {'fields': _strings}),

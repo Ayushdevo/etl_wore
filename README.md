@@ -175,3 +175,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `compact_arrays` | `fields` (required) | Remove only null array elements, preserving zero, false and empty strings. |
 | `unique_arrays` | `fields` (required) | Deduplicate strict JSON array values in first-seen order; distinguish booleans from numbers. |
 | `sort_arrays` | `fields` (required), `descending` | Sort homogeneous string or finite numeric arrays, optionally in descending order. |
+| `slice_arrays` | `fields` (required), `start`, `stop`, `step` | Slice arrays using Python start, stop and nonzero step semantics, preserving input order. |

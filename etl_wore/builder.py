@@ -19,6 +19,7 @@ from .transformers.strip_text import StripText
 from .transformers.normalize_unicode import NormalizeUnicode
 from .transformers.collapse_whitespace import CollapseWhitespace
 from .transformers.unescape_html import UnescapeHtml
+from .transformers.url_encode import UrlEncode
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -149,6 +150,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'url_encode': (UrlEncode, ['fields'], {'fields': _strings}),
     'unescape_html': (UnescapeHtml, ['fields'], {'fields': _strings}),
     'collapse_whitespace': (CollapseWhitespace, ['fields'], {'fields': _strings}),
     'normalize_unicode': (NormalizeUnicode, ['fields'], {'fields': _strings, 'form': lambda value: True}),

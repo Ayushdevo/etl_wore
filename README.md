@@ -168,3 +168,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `normalize_unicode` | `fields` (required), `form` | Normalize text with NFC by default; support NFD, NFKC and NFKD explicitly. |
 | `collapse_whitespace` | `fields` (required) | Replace runs of Unicode whitespace with single spaces and trim their edges. |
 | `unescape_html` | `fields` (required) | Decode HTML character references once; this operation does not sanitize HTML. |
+| `url_encode` | `fields` (required) | Percent-encode a complete UTF-8 URL component, including slashes and spaces. |

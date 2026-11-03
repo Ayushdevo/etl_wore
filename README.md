@@ -174,3 +174,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `base64_decode` | `fields` (required) | Decode canonical standard Base64 to UTF-8 text; reject malformed or binary payloads. |
 | `compact_arrays` | `fields` (required) | Remove only null array elements, preserving zero, false and empty strings. |
 | `unique_arrays` | `fields` (required) | Deduplicate strict JSON array values in first-seen order; distinguish booleans from numbers. |
+| `sort_arrays` | `fields` (required), `descending` | Sort homogeneous string or finite numeric arrays, optionally in descending order. |

@@ -28,6 +28,7 @@ from .transformers.unique_arrays import UniqueArrays
 from .transformers.sort_arrays import SortArrays
 from .transformers.slice_arrays import SliceArrays
 from .transformers.value_lengths import ValueLengths
+from .transformers.regex_extract import RegexExtract
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -158,6 +159,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'regex_extract': (RegexExtract, ['fields', 'pattern'], {'fields': _strings, 'pattern': lambda value: True, 'group': lambda value: True}),
     'value_lengths': (ValueLengths, ['fields'], {'fields': _strings}),
     'slice_arrays': (SliceArrays, ['fields'], {'fields': _strings, 'start': lambda value: True, 'stop': lambda value: True, 'step': lambda value: True}),
     'sort_arrays': (SortArrays, ['fields'], {'fields': _strings, 'descending': lambda value: True}),

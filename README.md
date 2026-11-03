@@ -177,3 +177,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `sort_arrays` | `fields` (required), `descending` | Sort homogeneous string or finite numeric arrays, optionally in descending order. |
 | `slice_arrays` | `fields` (required), `start`, `stop`, `step` | Slice arrays using Python start, stop and nonzero step semantics, preserving input order. |
 | `value_lengths` | `fields` (required) | Replace text, array or object fields with their lengths; text length counts Unicode code points. |
+| `regex_extract` | `fields` (required), `pattern` (required), `group` | Extract the first regular-expression match or chosen group; unmatched fields become null. |

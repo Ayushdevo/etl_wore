@@ -176,3 +176,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `unique_arrays` | `fields` (required) | Deduplicate strict JSON array values in first-seen order; distinguish booleans from numbers. |
 | `sort_arrays` | `fields` (required), `descending` | Sort homogeneous string or finite numeric arrays, optionally in descending order. |
 | `slice_arrays` | `fields` (required), `start`, `stop`, `step` | Slice arrays using Python start, stop and nonzero step semantics, preserving input order. |
+| `value_lengths` | `fields` (required) | Replace text, array or object fields with their lengths; text length counts Unicode code points. |

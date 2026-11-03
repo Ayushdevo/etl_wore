@@ -22,6 +22,7 @@ from .transformers.unescape_html import UnescapeHtml
 from .transformers.url_encode import UrlEncode
 from .transformers.url_decode import UrlDecode
 from .transformers.base64_encode import Base64Encode
+from .transformers.base64_decode import Base64Decode
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -152,6 +153,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'base64_decode': (Base64Decode, ['fields'], {'fields': _strings}),
     'base64_encode': (Base64Encode, ['fields'], {'fields': _strings}),
     'url_decode': (UrlDecode, ['fields'], {'fields': _strings}),
     'url_encode': (UrlEncode, ['fields'], {'fields': _strings}),

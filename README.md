@@ -170,3 +170,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `unescape_html` | `fields` (required) | Decode HTML character references once; this operation does not sanitize HTML. |
 | `url_encode` | `fields` (required) | Percent-encode a complete UTF-8 URL component, including slashes and spaces. |
 | `url_decode` | `fields` (required) | Decode percent-encoded UTF-8 components strictly; preserve literal plus signs. |
+| `base64_encode` | `fields` (required) | Encode UTF-8 text with standard padded Base64. |

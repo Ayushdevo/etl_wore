@@ -15,6 +15,21 @@ from .loaders.csv_loader import CsvLoader
 from .loaders.json_loader import JsonLinesLoader
 from .loaders.sqlite_loader import SqliteLoader, _identifier_key
 from .pipeline.engine import Pipeline
+from .transformers.strip_text import StripText
+from .transformers.normalize_unicode import NormalizeUnicode
+from .transformers.collapse_whitespace import CollapseWhitespace
+from .transformers.unescape_html import UnescapeHtml
+from .transformers.url_encode import UrlEncode
+from .transformers.url_decode import UrlDecode
+from .transformers.base64_encode import Base64Encode
+from .transformers.base64_decode import Base64Decode
+from .transformers.compact_arrays import CompactArrays
+from .transformers.unique_arrays import UniqueArrays
+from .transformers.sort_arrays import SortArrays
+from .transformers.slice_arrays import SliceArrays
+from .transformers.value_lengths import ValueLengths
+from .transformers.regex_extract import RegexExtract
+from .transformers.parse_booleans import ParseBooleans
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -145,6 +160,21 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'parse_booleans': (ParseBooleans, ['fields'], {'fields': _strings}),
+    'regex_extract': (RegexExtract, ['fields', 'pattern'], {'fields': _strings, 'pattern': lambda value: True, 'group': lambda value: True}),
+    'value_lengths': (ValueLengths, ['fields'], {'fields': _strings}),
+    'slice_arrays': (SliceArrays, ['fields'], {'fields': _strings, 'start': lambda value: True, 'stop': lambda value: True, 'step': lambda value: True}),
+    'sort_arrays': (SortArrays, ['fields'], {'fields': _strings, 'descending': lambda value: True}),
+    'unique_arrays': (UniqueArrays, ['fields'], {'fields': _strings}),
+    'compact_arrays': (CompactArrays, ['fields'], {'fields': _strings}),
+    'base64_decode': (Base64Decode, ['fields'], {'fields': _strings}),
+    'base64_encode': (Base64Encode, ['fields'], {'fields': _strings}),
+    'url_decode': (UrlDecode, ['fields'], {'fields': _strings}),
+    'url_encode': (UrlEncode, ['fields'], {'fields': _strings}),
+    'unescape_html': (UnescapeHtml, ['fields'], {'fields': _strings}),
+    'collapse_whitespace': (CollapseWhitespace, ['fields'], {'fields': _strings}),
+    'normalize_unicode': (NormalizeUnicode, ['fields'], {'fields': _strings, 'form': lambda value: True}),
+    'strip_text': (StripText, ['fields'], {'fields': _strings}),
     'hash_fields': (HashFields, ['fields', 'target'], {'fields': lambda value: True, 'target': lambda value: True, 'algorithm': lambda value: True}),
     'unflatten': (UnflattenRecord, [], {'separator': lambda value: True}),
     'flatten': (FlattenRecord, [], {'separator': lambda value: True}),

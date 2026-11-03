@@ -164,3 +164,35 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `flatten` | `separator` | Flatten nested objects to separated paths, preserving arrays and empty objects; reject ambiguous keys. |
 | `unflatten` | `separator` | Rebuild nested objects from separated paths; reject prefix collisions in either input order. |
 | `hash_fields` | `fields` (required), `target` (required), `algorithm` | Compute stable field digests from strict canonical JSON; hashing alone does not anonymize personal data. |
+| `strip_text` | `fields` (required) | Strip leading and trailing Unicode whitespace from selected text fields. |
+| `normalize_unicode` | `fields` (required), `form` | Normalize text with NFC by default; support NFD, NFKC and NFKD explicitly. |
+| `collapse_whitespace` | `fields` (required) | Replace runs of Unicode whitespace with single spaces and trim their edges. |
+| `unescape_html` | `fields` (required) | Decode HTML character references once; this operation does not sanitize HTML. |
+| `url_encode` | `fields` (required) | Percent-encode a complete UTF-8 URL component, including slashes and spaces. |
+| `url_decode` | `fields` (required) | Decode percent-encoded UTF-8 components strictly; preserve literal plus signs. |
+| `base64_encode` | `fields` (required) | Encode UTF-8 text with standard padded Base64. |
+| `base64_decode` | `fields` (required) | Decode canonical standard Base64 to UTF-8 text; reject malformed or binary payloads. |
+| `compact_arrays` | `fields` (required) | Remove only null array elements, preserving zero, false and empty strings. |
+| `unique_arrays` | `fields` (required) | Deduplicate strict JSON array values in first-seen order; distinguish booleans from numbers. |
+| `sort_arrays` | `fields` (required), `descending` | Sort homogeneous string or finite numeric arrays, optionally in descending order. |
+| `slice_arrays` | `fields` (required), `start`, `stop`, `step` | Slice arrays using Python start, stop and nonzero step semantics, preserving input order. |
+| `value_lengths` | `fields` (required) | Replace text, array or object fields with their lengths; text length counts Unicode code points. |
+| `regex_extract` | `fields` (required), `pattern` (required), `group` | Extract the first regular-expression match or chosen group; unmatched fields become null. |
+| `parse_booleans` | `fields` (required) | Parse true/false and 1/0 text or integer flags explicitly; preserve existing booleans. |
+
+### Run the cleaning example
+
+```bash
+python -m etl_wore --spec examples/clean_records.json --dry-run
+python -m etl_wore --spec examples/clean_records.json --summary json
+```
+
+The example composes the text, encoding, array and flag operations above and
+appends one cleaned record to `output/clean_records.jsonl`. Input and output
+paths resolve relative to the specification. URL operations act on components,
+not complete URLs; literal plus signs remain plus signs when decoding. Base64
+decoding requires canonical standard padding and UTF-8 text. Unicode
+normalization defaults to NFC; compatibility normalization requires an explicit
+NFKC or NFKD option. Array operations accept lists; nested nulls are preserved
+by `compact_arrays`, and `unique_arrays` compares canonical JSON values.
+HTML entity decoding does not make markup safe to render.

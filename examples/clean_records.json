@@ -1,0 +1,23 @@
+{
+  "name": "clean-records",
+  "batch_size": 2,
+  "extractors": [{"type": "json", "filepath": "../fixtures/unclean_records.json"}],
+  "transformers": [
+    {"type": "strip_text", "fields": ["name"]},
+    {"type": "normalize_unicode", "fields": ["name"]},
+    {"type": "collapse_whitespace", "fields": ["name"]},
+    {"type": "unescape_html", "fields": ["name"]},
+    {"type": "url_decode", "fields": ["component"]},
+    {"type": "url_encode", "fields": ["component"]},
+    {"type": "base64_decode", "fields": ["message"]},
+    {"type": "base64_encode", "fields": ["message"]},
+    {"type": "compact_arrays", "fields": ["tags"]},
+    {"type": "unique_arrays", "fields": ["tags"]},
+    {"type": "sort_arrays", "fields": ["tags"]},
+    {"type": "slice_arrays", "fields": ["tags"], "stop": 1},
+    {"type": "value_lengths", "fields": ["length"]},
+    {"type": "regex_extract", "fields": ["id"], "pattern": "ref:(\\d+)", "group": 1},
+    {"type": "parse_booleans", "fields": ["active"]}
+  ],
+  "loaders": [{"type": "jsonl", "output_path": "../output/clean_records.jsonl"}]
+}

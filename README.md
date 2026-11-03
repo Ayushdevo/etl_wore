@@ -164,3 +164,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `flatten` | `separator` | Flatten nested objects to separated paths, preserving arrays and empty objects; reject ambiguous keys. |
 | `unflatten` | `separator` | Rebuild nested objects from separated paths; reject prefix collisions in either input order. |
 | `hash_fields` | `fields` (required), `target` (required), `algorithm` | Compute stable field digests from strict canonical JSON; hashing alone does not anonymize personal data. |
+| `strip_text` | `fields` (required) | Strip leading and trailing Unicode whitespace from selected text fields. |

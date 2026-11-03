@@ -15,6 +15,7 @@ from .loaders.csv_loader import CsvLoader
 from .loaders.json_loader import JsonLinesLoader
 from .loaders.sqlite_loader import SqliteLoader, _identifier_key
 from .pipeline.engine import Pipeline
+from .transformers.strip_text import StripText
 from .transformers.select_fields import SelectFields
 from .transformers.drop_fields import DropFields
 from .transformers.rename_fields import RenameFields
@@ -145,6 +146,7 @@ _EXTRACTORS = {
     ),
 }
 _TRANSFORMERS = {
+    'strip_text': (StripText, ['fields'], {'fields': _strings}),
     'hash_fields': (HashFields, ['fields', 'target'], {'fields': lambda value: True, 'target': lambda value: True, 'algorithm': lambda value: True}),
     'unflatten': (UnflattenRecord, [], {'separator': lambda value: True}),
     'flatten': (FlattenRecord, [], {'separator': lambda value: True}),

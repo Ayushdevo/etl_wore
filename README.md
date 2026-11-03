@@ -166,3 +166,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `hash_fields` | `fields` (required), `target` (required), `algorithm` | Compute stable field digests from strict canonical JSON; hashing alone does not anonymize personal data. |
 | `strip_text` | `fields` (required) | Strip leading and trailing Unicode whitespace from selected text fields. |
 | `normalize_unicode` | `fields` (required), `form` | Normalize text with NFC by default; support NFD, NFKC and NFKD explicitly. |
+| `collapse_whitespace` | `fields` (required) | Replace runs of Unicode whitespace with single spaces and trim their edges. |

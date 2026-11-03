@@ -172,3 +172,4 @@ These optional built-ins work in Python and JSON/YAML specifications. Each trans
 | `url_decode` | `fields` (required) | Decode percent-encoded UTF-8 components strictly; preserve literal plus signs. |
 | `base64_encode` | `fields` (required) | Encode UTF-8 text with standard padded Base64. |
 | `base64_decode` | `fields` (required) | Decode canonical standard Base64 to UTF-8 text; reject malformed or binary payloads. |
+| `compact_arrays` | `fields` (required) | Remove only null array elements, preserving zero, false and empty strings. |

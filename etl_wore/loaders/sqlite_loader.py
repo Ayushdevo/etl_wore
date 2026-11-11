@@ -39,7 +39,11 @@ class SqliteLoader(BaseLoader):
         if not records:
             return
 
+        if any(not isinstance(record, dict) for record in records):
+            raise LoadingError("SQLite records must be objects")
         columns = list(records[0].keys())
+        if not columns or any(not isinstance(column, str) or not column or "\x00" in column for record in records for column in record):
+            raise LoadingError("SQLite columns must be nonempty strings without NUL bytes")
         if any(set(record) - set(columns) for record in records):
             raise LoadingError("Record contains columns absent from the first SQLite batch record")
 

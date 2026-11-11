@@ -269,6 +269,8 @@ def _component(entry, registry, location, base_dir=None):
     if base_dir is not None:
         for name in ("filepath", "output_path", "db_path"):
             if name in options:
+                if name == "db_path" and options[name] == ":memory:":
+                    continue
                 try:
                     options[name] = str((Path(base_dir) / options[name]).resolve())
                 except (OSError, ValueError, RuntimeError) as exc:
@@ -296,6 +298,8 @@ def _validate_destinations(pipeline):
     destinations = []
     for sink in pipeline.loaders:
         target = getattr(sink, "output_path", getattr(sink, "db_path", None))
+        if isinstance(sink, SqliteLoader) and target == ":memory:":
+            continue  # Each connection owns a distinct in-memory database.
         if any(_same_path(source, target) for source in sources):
             raise ConfigurationError("An output destination must not overwrite an input source")
         for previous in destinations:

@@ -31,6 +31,9 @@ class RestApiExtractor(BaseExtractor):
         try:
             parts = urlparse(endpoint) if isinstance(endpoint, str) else None
             valid_url = parts is not None and parts.scheme in {"http", "https"} and bool(parts.hostname)
+            if valid_url:
+                _ = parts.port
+                valid_url = not any(char.isspace() or ord(char) < 32 or ord(char) == 127 or char == "\\" for char in endpoint)
         except ValueError:
             valid_url = False
         if not valid_url:

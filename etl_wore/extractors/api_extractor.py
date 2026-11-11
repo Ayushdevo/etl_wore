@@ -86,7 +86,14 @@ class RestApiExtractor(BaseExtractor):
                     f"Failed to fetch page {page} from {self.endpoint}: {e}"
                 ) from e
 
-            items = data if isinstance(data, list) else data.get("items", data.get("data", []))
+            if isinstance(data, list):
+                items = data
+            elif isinstance(data, dict) and ("items" in data or "data" in data):
+                items = data["items"] if "items" in data else data["data"]
+            else:
+                raise ExtractionError(f"REST page {page} must be an array or an items/data envelope")
+            if not isinstance(items, list) or any(not isinstance(item, dict) for item in items):
+                raise ExtractionError(f"REST page {page} must contain an array of objects")
             if not items:
                 break
 

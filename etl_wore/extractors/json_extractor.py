@@ -32,6 +32,8 @@ class JsonExtractor(BaseExtractor):
     def __init__(self, filepath: str, is_lines: bool = False, encoding: str = "utf-8-sig"):
         super().__init__(name=f"JsonExtractor({os.path.basename(filepath)})")
         self.filepath = filepath
+        if not isinstance(is_lines, bool):
+            raise ValueError("is_lines must be a boolean")
         self.is_lines = is_lines
         self.encoding = encoding
 

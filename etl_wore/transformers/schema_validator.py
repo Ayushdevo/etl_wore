@@ -4,6 +4,7 @@ Schema validation and field type casting.
 import math
 from typing import Dict, Any, Optional, Type
 from .base import BaseTransformer
+from ._records import record_copy
 from ..exceptions import TransformationError
 
 class SchemaValidator(BaseTransformer):
@@ -20,7 +21,7 @@ class SchemaValidator(BaseTransformer):
         self.drop_invalid = drop_invalid
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        transformed = dict(record)
+        transformed = record_copy(record)
         for field, expected_type in self.schema.items():
             if field not in transformed:
                 if self.drop_invalid:

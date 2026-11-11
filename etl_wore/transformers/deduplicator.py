@@ -3,6 +3,7 @@ Deduplication transformer using key hashes.
 """
 from typing import Dict, Any, Optional, List
 from .base import BaseTransformer
+from ..exceptions import TransformationError
 
 def _freeze(value):
     """Make nested JSON values hashable without depending on mapping order."""
@@ -22,7 +23,11 @@ class DeduplicationTransformer(BaseTransformer):
         self._seen_keys = set()
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        composite_key = tuple((k in record, _freeze(record.get(k))) for k in self.key_fields)
+        try:
+            composite_key = tuple((k in record, _freeze(record.get(k))) for k in self.key_fields)
+            hash(composite_key)
+        except (TypeError, RecursionError) as exc:
+            raise TransformationError("Deduplication key must be an acyclic hashable value") from exc
         if composite_key in self._seen_keys:
             return None  # Drop duplicate
         self._seen_keys.add(composite_key)

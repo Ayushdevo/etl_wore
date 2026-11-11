@@ -12,6 +12,8 @@ class CsvLoader(BaseLoader):
     def __init__(self, output_path: str, delimiter: str = ","):
         super().__init__(name=f"CsvLoader({os.path.basename(output_path)})")
         self.output_path = output_path
+        if not isinstance(delimiter, str) or len(delimiter) != 1 or delimiter in "\r\n\0":
+            raise ValueError("delimiter must be one non-control character")
         self.delimiter = delimiter
         self._initialized = False
 

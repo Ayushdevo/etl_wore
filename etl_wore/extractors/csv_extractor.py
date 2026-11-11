@@ -11,6 +11,8 @@ class CsvExtractor(BaseExtractor):
     def __init__(self, filepath: str, delimiter: str = None, encoding: str = "utf-8-sig"):
         super().__init__(name=f"CsvExtractor({os.path.basename(filepath)})")
         self.filepath = filepath
+        if delimiter is not None and (not isinstance(delimiter, str) or len(delimiter) != 1 or delimiter in "\r\n\0"):
+            raise ValueError("delimiter must be one non-control character or None")
         self.delimiter = delimiter
         self.encoding = encoding
 

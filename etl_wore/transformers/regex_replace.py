@@ -17,7 +17,7 @@ class RegexReplace(FieldTransform):
             self.pattern.sub(
                 replacement, ""
             )  # Validate replacement backreferences now.
-        except re.error as exc:
+        except (re.error, IndexError) as exc:
             raise ValueError(f"Invalid regular expression: {exc}") from exc
         self.replacement, self.count = replacement, count
 

@@ -3,7 +3,7 @@ REST API extractor with pagination support.
 """
 
 import math
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit, urlunsplit, parse_qsl
 from typing import Any, Dict, Generator, Optional
 
 import requests
@@ -57,9 +57,13 @@ class RestApiExtractor(BaseExtractor):
 
     @retry(max_attempts=3, initial_delay=1.0, exceptions=(requests.ConnectionError, requests.Timeout, _TransientHttpError))
     def _fetch_page(self, page: int) -> Dict[str, Any]:
-        params = {self.page_param: page}
+        parts = urlsplit(self.endpoint)
+        params = [(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True)
+                  if key != self.page_param]
+        params.append((self.page_param, page))
+        endpoint = urlunsplit((parts.scheme, parts.netloc, parts.path, "", parts.fragment))
         response = requests.get(
-            self.endpoint, headers=self.headers, params=params, timeout=self.timeout
+            endpoint, headers=self.headers, params=params, timeout=self.timeout
         )
         try:
             try:

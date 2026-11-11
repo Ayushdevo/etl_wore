@@ -22,7 +22,7 @@ def test_rest_source_forwards_pagination_and_headers():
         assert list(source.extract()) == [{"id": 1}]
         assert get.call_args.kwargs == {
             "headers": {"X-Test": "ok"},
-            "params": {"p": 2},
+            "params": [("p", 2)],
             "timeout": 10,
         }
 

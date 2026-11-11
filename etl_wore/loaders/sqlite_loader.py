@@ -20,6 +20,8 @@ class SqliteLoader(BaseLoader):
     def __init__(self, db_path: str, table_name: str):
         super().__init__(name=f"SqliteLoader({table_name})")
         self.db_path = db_path
+        if not isinstance(table_name, str) or not table_name or "\x00" in table_name:
+            raise ValueError("table_name must be a nonempty string without NUL bytes")
         self.table_name = table_name
         self._conn = None
         self._lock = RLock()
@@ -44,6 +46,8 @@ class SqliteLoader(BaseLoader):
         columns = list(records[0].keys())
         if not columns or any(not isinstance(column, str) or not column or "\x00" in column for record in records for column in record):
             raise LoadingError("SQLite columns must be nonempty strings without NUL bytes")
+        if len({_identifier_key(column) for column in columns}) != len(columns):
+            raise LoadingError("SQLite column names must be unique ignoring ASCII case")
         if any(set(record) - set(columns) for record in records):
             raise LoadingError("Record contains columns absent from the first SQLite batch record")
 

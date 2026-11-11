@@ -10,6 +10,16 @@ from ._records import (
 from .base import BaseTransformer
 
 
+def _equal(left, right):
+    if type(left) is not type(right):
+        return False
+    if isinstance(left, dict):
+        return left.keys() == right.keys() and all(_equal(left[key], right[key]) for key in left)
+    if isinstance(left, (list, tuple)):
+        return len(left) == len(right) and all(_equal(a, b) for a, b in zip(left, right))
+    return left == right
+
+
 class FilterValue(BaseTransformer):
     def __init__(self, field, value, exclude=False):
         super().__init__()
@@ -21,7 +31,6 @@ class FilterValue(BaseTransformer):
         out = record_copy(record)
         matches = (
             self.field in out
-            and type(out[self.field]) is type(self.value)
-            and out[self.field] == self.value
+            and _equal(out[self.field], self.value)
         )
         return out if matches != self.exclude else None

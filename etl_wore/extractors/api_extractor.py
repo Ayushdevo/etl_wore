@@ -3,6 +3,7 @@ REST API extractor with pagination support.
 """
 
 import math
+import sys
 from urllib.parse import urlparse, urlsplit, urlunsplit, parse_qsl
 from typing import Any, Dict, Generator, Optional
 
@@ -74,7 +75,12 @@ class RestApiExtractor(BaseExtractor):
                 raise
             return response.json()
         finally:
-            response.close()
+            processing_failed = sys.exc_info()[0] is not None
+            try:
+                response.close()
+            except Exception:
+                if not processing_failed:
+                    raise
 
     def extract(self) -> Generator[Dict[str, Any], None, None]:
         page = 1

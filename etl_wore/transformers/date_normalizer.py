@@ -5,6 +5,7 @@ from datetime import timezone
 from typing import Dict, Any, Optional, List
 import dateutil.parser
 from .base import BaseTransformer
+from ._records import record_copy
 
 class DateNormalizer(BaseTransformer):
     def __init__(self, date_fields: List[str], output_format: str = "%Y-%m-%dT%H:%M:%SZ"):
@@ -17,7 +18,7 @@ class DateNormalizer(BaseTransformer):
         self.output_format = output_format
 
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        out = dict(record)
+        out = record_copy(record)
         for field in self.date_fields:
             raw_val = out.get(field)
             if raw_val:

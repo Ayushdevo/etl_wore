@@ -22,6 +22,9 @@ class DeduplicationTransformer(BaseTransformer):
         self.key_fields = tuple(key_fields)
         self._seen_keys = set()
 
+    def start_run(self):
+        self._seen_keys.clear()
+
     def transform(self, record: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         try:
             composite_key = tuple((k in record, _freeze(record.get(k))) for k in self.key_fields)

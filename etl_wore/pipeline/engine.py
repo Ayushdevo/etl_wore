@@ -49,6 +49,9 @@ class Pipeline:
         logger.info(f"Starting pipeline '{self.name}'...")
 
         try:
+            for transformer in self.transformers:
+                if isinstance(transformer, BaseTransformer):
+                    transformer.start_run()
             batch = []
             for extractor in self.extractors:
                 iterator = iter(extractor.extract())

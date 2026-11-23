@@ -22,6 +22,8 @@ class CsvLoader(BaseLoader):
             return
 
         try:
+            if any(not isinstance(record, dict) for record in records):
+                raise ValueError("CSV records must be objects")
             os.makedirs(os.path.dirname(os.path.abspath(self.output_path)), exist_ok=True)
             headers = list(records[0].keys())
             has_content = os.path.exists(self.output_path) and os.path.getsize(self.output_path) > 0
@@ -31,7 +33,8 @@ class CsvLoader(BaseLoader):
             if not headers or any(not isinstance(name, str) or not name for name in headers) or len(set(headers)) != len(headers):
                 raise ValueError("CSV column names must be nonempty, unique strings")
             # Validate the whole batch before appending any rows.
-            if any(set(record) - set(headers) for record in records):
+            header_names = set(headers)
+            if any(record.keys() - header_names for record in records):
                 raise ValueError("Record contains columns absent from the CSV header")
             mode = "a" if has_content else "w"
             write_header = not has_content

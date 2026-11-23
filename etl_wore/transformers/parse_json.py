@@ -10,9 +10,12 @@ class ParseJsonFields(FieldTransform):
     def convert(self, value):
         if not isinstance(value, str):
             raise ValueError("expected a JSON string")
-        return json.loads(
-            value,
-            parse_constant=_reject_constant,
-            parse_float=_finite_float,
-            object_pairs_hook=_unique_object,
-        )
+        try:
+            return json.loads(
+                value,
+                parse_constant=_reject_constant,
+                parse_float=_finite_float,
+                object_pairs_hook=_unique_object,
+            )
+        except RecursionError as exc:
+            raise ValueError("embedded JSON is nested too deeply") from exc

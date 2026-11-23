@@ -91,9 +91,11 @@ class SpecParser:
                         spec = yaml.load(source, Loader=UniqueSafeLoader)
                     except yaml.YAMLError as exc:
                         raise ConfigurationError(f"Invalid YAML specification: {exc}") from exc
+            if not isinstance(spec, dict):
+                raise ConfigurationError("Pipeline specification must be a mapping")
+            _check_alias_cycles(spec)
+        except RecursionError as exc:
+            raise ConfigurationError("Pipeline specification is nested too deeply") from exc
         except (OSError, ValueError) as exc:
             raise ConfigurationError(f"Unable to read specification {filepath}: {exc}") from exc
-        if not isinstance(spec, dict):
-            raise ConfigurationError("Pipeline specification must be a mapping")
-        _check_alias_cycles(spec)
         return spec

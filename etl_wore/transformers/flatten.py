@@ -3,10 +3,7 @@
 from copy import deepcopy
 
 from ..exceptions import TransformationError
-from ._records import (
-    field_name,
-    record_copy,
-)
+from ._records import field_name
 from .base import BaseTransformer
 
 
@@ -16,7 +13,8 @@ class FlattenRecord(BaseTransformer):
         self.separator = field_name(separator)
 
     def transform(self, record):
-        record_copy(record)  # Validate input before traversal.
+        if not isinstance(record, dict):
+            raise TransformationError("Record must be an object")
         result, active = {}, set()
 
         def visit(mapping, prefix):

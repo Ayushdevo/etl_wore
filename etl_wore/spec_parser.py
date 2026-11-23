@@ -30,7 +30,7 @@ def _reject_constant(text):
     raise ConfigurationError(f"Invalid JSON constant in specification: {text}")
 
 
-def _check_alias_cycles(value, active=None):
+def _check_alias_cycles(value, active=None, validated=None):
     if not isinstance(value, (dict, list)):
         if value is not None and not isinstance(value, (str, int, float, bool)):
             raise ConfigurationError("Specifications require JSON-compatible scalar values")
@@ -38,14 +38,19 @@ def _check_alias_cycles(value, active=None):
             raise ConfigurationError("Specification numbers must be finite")
         return
     active = set() if active is None else active
-    if id(value) in active:
+    validated = set() if validated is None else validated
+    identity = id(value)
+    if identity in active:
         raise ConfigurationError("Recursive YAML aliases are not supported")
-    active.add(id(value))
+    if identity in validated:
+        return
+    active.add(identity)
     try:
         for item in (value.values() if isinstance(value, dict) else value):
-            _check_alias_cycles(item, active)
+            _check_alias_cycles(item, active, validated)
     finally:
-        active.remove(id(value))
+        active.remove(identity)
+    validated.add(identity)
 
 
 class SpecParser:

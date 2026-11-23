@@ -4,6 +4,7 @@ CSV destination loader.
 import csv
 import io
 import os
+from threading import Lock
 from typing import List, Dict, Any
 from .base import BaseLoader
 from ..exceptions import LoadingError
@@ -16,8 +17,13 @@ class CsvLoader(BaseLoader):
             raise ValueError("delimiter must be one non-control character")
         self.delimiter = delimiter
         self._initialized = False
+        self._lock = Lock()
 
     def load(self, records: List[Dict[str, Any]]):
+        with self._lock:
+            self._append_records(records)
+
+    def _append_records(self, records):
         if not records:
             return
 
